@@ -1,0 +1,13 @@
+#grid {
+    background-color: orangered;
+    display: grid;
+    padding: 2em;
+    grid-column-gap: 2em;
+    grid-row-gap: 1em;
+    grid-template-columns: 20em 20em auto;
+}
+.grid-item {
+    background-color: orchid;
+    font-size: 20px;
+    height: 5em;
+}

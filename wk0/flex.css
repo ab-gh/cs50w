@@ -1,0 +1,12 @@
+#container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#container > div {
+    background-color: tomato;
+    font-size: 20px;
+    margin: 2em;
+    padding: 2em;
+    width: 200px;
+}
