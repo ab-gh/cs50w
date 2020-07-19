@@ -17,9 +17,11 @@
     </head>
     <body>
 
-        <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary d-flex justify-content-between">
+        <nav class="navbar sticky-top navbar-expand-lg navbar-light d-flex justify-content-between">
 
-            <text class="navbar-brand" >cs50w Google</text>
+            <div class="text-center">
+                <text class="navbar-brand">cs50w Google</text>
+            </div>
 
             <div>
                 <a class="navbar-brand" href="image.html">Image Search</a>
@@ -31,7 +33,7 @@
 
         <!--Bootstrap page container-->
         <div class="container">
-            <form action="">
+            <form action="https://google.com/search">
 
                 <!--center justify and span-->
                 <div class="row d-flex justify-content-center pt-5">
@@ -51,7 +53,7 @@
                                         </svg>
                                     </div>
                                 </div>
-                                <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Google Search">
+                                <input type="text" name="q" class="form-control" id="inlineFormInputGroup" placeholder="Google Search">
                             </div>
                         </div>
 
@@ -61,8 +63,9 @@
                 <!--center justify and span-->
                 <div class="row d-flex justify-content-center pt-3">
 
-                        <input class="btn btn-secondary mx-2" type="submit" value="Google Search">
-                        <input class="btn btn-secondary mx-2" type="submit" value="I'm Feeling Lucky">
+                    <input class="btn btn-secondary mx-2" type="submit" value="Google Search">
+                    
+                    <input class="btn btn-secondary mx-2" type="submit" value="I'm Feeling Lucky" name="btnI">
 
                 </div>
 
@@ -70,4 +73,5 @@
         </div>
 
     </body>
+
 </html>
