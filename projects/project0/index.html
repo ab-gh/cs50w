@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <!--page title-->
+        <title>Search</title>
+
+        <!--bootstrap source-->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+        
+        <!--custom sass styling-->
+        <link rel="stylesheet" href="style.css">
+
+    </head>
+    <body>
+
+        <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary d-flex justify-content-between">
+
+            <text class="navbar-brand" >cs50w Google</text>
+
+            <div>
+                <a class="navbar-brand" href="image.html">Image Search</a>
+                <a class="navbar-brand" href="advanced.html">Advanced Search</a>
+            </div>
+
+        </nav>
+
+
+        <!--Bootstrap page container-->
+        <div class="container">
+            <form action="">
+
+                <!--center justify and span-->
+                <div class="row d-flex justify-content-center pt-5">
+                    <div class="col-lg-6 col-sm-6">
+
+                        <!--header-->
+                        <h1>Google Search</h1>
+
+                        <!--search input-->
+                        <div class="form-row">
+                            <div class="input-group mb-2 pt-5">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-search" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
+                                            <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Google Search">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!--center justify and span-->
+                <div class="row d-flex justify-content-center pt-3">
+
+                        <input class="btn btn-secondary mx-2" type="submit" value="Google Search">
+                        <input class="btn btn-secondary mx-2" type="submit" value="I'm Feeling Lucky">
+
+                </div>
+
+            </form>
+        </div>
+
+    </body>
+</html>

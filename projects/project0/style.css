@@ -1,0 +1,11 @@
+.input-group-text {
+  border-top-left-radius: 200px;
+  border-bottom-left-radius: 200px;
+}
+
+input[type=text] {
+  border-top-right-radius: 200px;
+  border-bottom-right-radius: 200px;
+}
+
+/*# sourceMappingURL=style.css.map */
