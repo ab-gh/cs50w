@@ -1,0 +1,7 @@
+h1 {
+    font-family: sans-serif;
+    font-size: 90px;
+    text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
