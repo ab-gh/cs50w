@@ -1,15 +1,16 @@
-{% load static %}
+{% extends "tasks/layout.html" %} 
 
-<!DOCTYPE html>
+{% block body %}
 
-<html lang="en">
-    <head>
-        <title>Is it New Year's Day?</title>
-        <link rel="stylesheet" href="{% static 'newyear/styles.css' %}">
-    </head>
-    <body>
-        
+    <h1>Tasks</h1>
 
-    </body>
-
-</html>
+    <ul>
+        {% for task in tasks %}
+        <li>{{ task }}</li>
+        {% empty %}
+        <li>No tasks</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'tasks:add' %}">Add New Task</a>
+{% endblock %}
+   
