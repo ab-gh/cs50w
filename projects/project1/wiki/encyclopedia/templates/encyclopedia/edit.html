@@ -1,18 +1,18 @@
 {% extends "encyclopedia/layout.html" %}
 
 {% block title %}
-    New Page
+    Edit Page {{ title }}
 {% endblock %}
 
 {% block body %}
     
-    <h1>New Page</h1>
+    <h1>Edit {{ title }}</h1>
     {% if error %}
     <div class="alert alert-warning" role="alert">
         {{ error }}
       </div>
     {% endif %}
-    <form action="{% url 'wiki:new' %}" method="post">
+    <form action="" method="post">
         {% csrf_token %}
         <table>
         {{ form.as_table }}
