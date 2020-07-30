@@ -1,3 +1,11 @@
 body {
     padding: 10px;
 }
+#container {
+    display: flex;
+    flex-wrap: wrap;
+}
+img {
+    display: block;
+    max-width: 40%;
+}

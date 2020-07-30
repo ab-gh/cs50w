@@ -3,5 +3,29 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+    {% for listing in listings %}
+    <div class="card mb-3 bg-light" >
+        <div class="row no-gutters">
+            <div class="col-md-4">
+                <img src="https://www.nomadfoods.com/wp-content/uploads/2018/08/placeholder-1-e1533569576673.png" class="card-img" alt="">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <a href="{% url 'listing' listing.id %}"><h5 class="card-title">{{ listing.title }}</h5></a>
+    
+                    <h6 class="card-subtitle mb-2 text-muted">Condition</h6>
+                    <p class="card-text">{{ listing.description }}</p>
+                    <h5 class="card-text"><strong>£{{ listing.starting_bid }}</strong></h5>
+                    <p class="card-subtitle mb-2 text-muted">2 Bids</p>
+
+                    <a href="{% url 'listing' listing.id %}" class="btn btn-primary">Bid</a>
+                    <a href="#" class="btn btn-secondary">Watch</a>
+
+                    <p class="card-text pt-2"><text class="text-muted">{{ listing.category }}</text></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
 {% endblock %}
