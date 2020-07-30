@@ -5,12 +5,25 @@
     <div class="card-header pt-3 align-text-top">
         <h2 class="align-text-bottom">{{ listing.title }}</h2>
     </div>
-    <img src="https://www.nomadfoods.com/wp-content/uploads/2018/08/placeholder-1-e1533569576673.png" class="card-img-top" alt="...">
-    <div class="card-body">
-      <h5 class="card-subtitle pb-1">Condition</h5>
-      <p class="card-text">{{ listing.description }}</p>
-      <a href="#" class="btn btn-primary">Go somewhere</a>
+    <div class="mx-auto">
+        <img src="https://www.nomadfoods.com/wp-content/uploads/2018/08/placeholder-1-e1533569576673.png" class="card-img-top" alt="...">
     </div>
-  </div>
+    <div class="card-body">
+        <h5 class="card-subtitle pb-1">{{ listing.condition }}</h5>
+        <p class="card-text">{{ listing.description }}</p>
+    </div>
+    <div class="card-footer">
+        <form action="">
+            <h5 class="card-subtitle pb-1">Current Bid: <strong>£{{ listing.starting_bid }}</strong></h5>
+            {% csrf_token %}
+            <div class="form-group">
+                {{ bid_form.bid }}
+            </div>
+
+            <input type="submit" class="btn btn-primary">
+        </form>
+    </div>
+    </div>
+</div>
 
 {% endblock %}

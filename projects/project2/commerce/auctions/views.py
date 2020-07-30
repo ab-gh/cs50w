@@ -7,11 +7,18 @@ from django.forms import ModelForm
 
 from .models import *
 
+## Model Forms
 class NewListing(ModelForm):
     class Meta:
         model = Listing
         exclude = ('owner', 'sold', 'created_date')
 
+class NewBid(ModelForm):
+    class Meta:
+        model = Bid
+        fields = ('bid',)
+
+## Routes
 def index(request):
     return render(request, "auctions/index.html", {
         "listings": Listing.objects.filter(sold=False)
@@ -20,7 +27,8 @@ def index(request):
 def listing(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
     return render(request, "auctions/listing.html", {
-        "listing": listing
+        "listing": listing,
+        "bid_form": NewBid()
     })
 
 def new_listing(request):

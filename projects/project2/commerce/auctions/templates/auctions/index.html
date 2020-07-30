@@ -13,7 +13,7 @@
                 <div class="card-body">
                     <a href="{% url 'listing' listing.id %}"><h5 class="card-title">{{ listing.title }}</h5></a>
     
-                    <h6 class="card-subtitle mb-2 text-muted">Condition</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ listing.condition }}</h6>
                     <p class="card-text">{{ listing.description }}</p>
                     <h5 class="card-text"><strong>£{{ listing.starting_bid }}</strong></h5>
                     <p class="card-subtitle mb-2 text-muted">2 Bids</p>

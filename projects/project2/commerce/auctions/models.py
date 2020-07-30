@@ -11,6 +11,12 @@ class User(AbstractUser):
         return f"{self.username}"
     pass
 
+class Condition(models.Model):
+    condition = models.CharField(max_length=20)
+
+    def __str__(self):
+        return f"{self.condition}"
+
 class Category(models.Model):
     name = models.CharField(max_length=64)
 
@@ -24,7 +30,8 @@ class Listing(models.Model):
     sold = models.BooleanField(default=False)
     starting_bid = models.FloatField()
     created_date = models.DateTimeField(auto_now=True)
-    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="listings", null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="listings", null=True, default=5)
+    condition = models.ForeignKey(Condition, on_delete=models.PROTECT, related_name="listings", null=True)
 
     def __str__(self):
         return f"{self.title} (Item {self.id})"
