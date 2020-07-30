@@ -7,6 +7,8 @@ def user_directory_path(instance, filename):
     pass
 
 class User(AbstractUser):
+    def __str__(self):
+        return f"{self.username}"
     pass
 
 class Category(models.Model):
@@ -24,15 +26,26 @@ class Listing(models.Model):
     created_date = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="listings", null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.title} (Item {self.id})"
+
 class Bid(models.Model):
     bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids")
     item = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids")
+    created_date = models.DateTimeField(auto_now=True)
     bid = models.DecimalField(max_digits=15, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.bid} for {self.item} by {self.bidder}"
     
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     item = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
+    created_date = models.DateTimeField(auto_now=True)
     comment = models.TextField()
+
+    def __str__(self):
+        return f"Comment on {self.item} by {self.user}"
 
 class Watch(models.Model):
     pass
