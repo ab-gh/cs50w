@@ -51,6 +51,8 @@ class Listing(models.Model):
                                  related_name="listings", null=True, default=5)
     condition = models.ForeignKey(Condition, on_delete=models.PROTECT, 
                                   related_name="listings", null=True)
+    image = models.URLField(max_length=250, blank=True,
+                            default="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png")
 
     def __str__(self):
         return f"{self.title} (Item {self.id})"
@@ -86,3 +88,8 @@ class Watch(models.Model):
     """
     TODO: A watchlist placed on an item by a user
     """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlist")
+    item = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="watchers")
+
+    def __str__(self):
+        return f"{self.user} watching {self.item} ({self.id})"

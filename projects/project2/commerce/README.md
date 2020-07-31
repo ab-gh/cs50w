@@ -23,10 +23,11 @@ Complete the implementation of your auction site. You must fulfill the following
     - [x] User
     - [x] Listing
         - [ ] Condition **MIGRATION**
-    - [ ] Bid
-    - [ ] Comment
+    - [x] Bid
+    - [x] Comment
     - [ ] Watch
     - [x] Category
+    - [x] Condition
 - **Create Listing**:
     - [ ] Add URL for image
 - **Active Listings Page**:

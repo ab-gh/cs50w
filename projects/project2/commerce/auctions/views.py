@@ -9,42 +9,117 @@ from .models import *
 
 ## Model Forms
 class NewListing(ModelForm):
+    """
+    Form inherited from the Listing model
+    """
+
+
     class Meta:
         model = Listing
-        exclude = ('owner', 'sold', 'created_date')
+        fields = ("title", "description", "starting_bid", "category", "condition", "image")
+
 
 class NewBid(ModelForm):
+    """
+    Form inherited from the Bid model
+    """
+
+
     class Meta:
         model = Bid
         fields = ('bid',)
 
+
 ## Routes
 def index(request):
+    """
+    `.` route
+    """
+
+    user_object = User.objects.filter(id=request.user.id).first()
+    
+    watching = {}
+
+    for item in Listing.objects.filter(sold=False):
+        try:
+            user_object.watchlist.get(item=item)
+        except Watch.DoesNotExist:
+            watching[item] = "False"
+        else:
+            watching[item] = "True"
+
+
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.filter(sold=False)
+        "listings": zip(Listing.objects.filter(sold=False), watching),
+        "categories": Category.objects.all(),
     })
 
+
+def category(request, category_id):
+    """
+    Shows all listings in the given category
+    """
+    return render(request, "auctions/category.html", {
+        "listings": Listing.objects.filter(sold=False, category=category_id),
+        "this_category": Category.objects.filter(id=category_id).first(),
+        "categories": Category.objects.all()
+    })
+    
+
+
+def categories(request):
+    """
+    Shows all listings in the given category
+    """
+    return render(request, "auctions/categories.html", {
+        "categories": Category.objects.all()
+    })
+
+
 def listing(request, listing_id):
+    """
+    Route for a specified listing
+    """
+    user_object = User.objects.filter(id=request.user.id).first()
+    item_object = Listing.objects.filter(id=listing_id).first()
+
+    try:
+        user_object.watchlist.get(item=item_object)
+    except Watch.DoesNotExist:
+        watching = False
+    else:
+        watching = True
+
     listing = Listing.objects.get(id=listing_id)
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "bid_form": NewBid()
+        "bid_form": NewBid(),
+        "categories": Category.objects.all(),
+        "watching": watching
     })
 
+
 def new_listing(request):
+    """
+    Route to create a new listing
+    """
     if request.method == "GET":
         return render(request, "auctions/new_listing.html", {
-            "form": NewListing()
+            "form": NewListing(),
+            "categories": Category.objects.all()
         })
-    if request.method == "POST":
+    else:
         form = NewListing(request.POST)
-        f = form.save(commit=False)
-        f.owner = User.objects.get(id=request.user.id)
-        f.save()
+        saved_form = form.save(commit=False)
+        saved_form.owner = User.objects.get(id=request.user.id)
+        saved_form.save()
         return HttpResponseRedirect(reverse("index"))
 
 
 def login_view(request):
+    """
+    Log in (builtin)
+    """
     if request.method == "POST":
 
         # Attempt to sign user in
@@ -58,18 +133,25 @@ def login_view(request):
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
+                "message": "Invalid username and/or password.",
+                "categories": Category.objects.all()
             })
     else:
         return render(request, "auctions/login.html")
 
 
 def logout_view(request):
+    """
+    Log out (builtin)
+    """
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
 
 def register(request):
+    """
+    Register an account (builtin)
+    """
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
@@ -79,7 +161,8 @@ def register(request):
         confirmation = request.POST["confirmation"]
         if password != confirmation:
             return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
+                "message": "Passwords must match.",
+                "categories": Category.objects.all()
             })
 
         # Attempt to create new user

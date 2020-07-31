@@ -13,7 +13,12 @@ class ListingAdmin(admin.ModelAdmin):
 class ConditionAdmin(admin.ModelAdmin):
     list_display = ("id", "condition")
 
+class WatchAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "item")
+
 admin.site.register(User)
 admin.site.register(Listing, ListingAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Condition, ConditionAdmin)
+admin.site.register(Bid)
+admin.site.register(Watch, WatchAdmin)

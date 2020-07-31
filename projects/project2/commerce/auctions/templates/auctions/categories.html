@@ -1,0 +1,21 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Categories</h2>
+
+    {% for category in categories %}
+    <div class="card mb-3 bg-light" >
+        <div class="row no-gutters">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <a href="{% url 'category' category.id %}"><h5 class="card-title">{{ category }}</h5></a>
+    
+                    <h6 class="card-subtitle mb-2 text-muted">{{ category.listings.count }} Items</h6>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+{% endblock %}
