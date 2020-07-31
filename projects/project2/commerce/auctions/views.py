@@ -38,20 +38,21 @@ def index(request):
 
     user_object = User.objects.filter(id=request.user.id).first()
     
-    watching = {}
-
-    for item in Listing.objects.filter(sold=False):
+    def view_listing(item):
+        rv = {**item.__dict__}
         try:
             user_object.watchlist.get(item=item)
         except Watch.DoesNotExist:
-            watching[item] = "False"
+            rv["watching"] = False
         else:
-            watching[item] = "True"
+            rv["watching"] = True
+        return rv
 
-
+    view_listings = [view_listing(item) for item in Listing.objects.filter(sold=False)]
+  
     return render(request, "auctions/index.html", {
-        "listings": zip(Listing.objects.filter(sold=False), watching),
-        "categories": Category.objects.all(),
+        "listings": view_listings,
+        "categories": Category.objects.all()
     })
 
 
@@ -59,8 +60,24 @@ def category(request, category_id):
     """
     Shows all listings in the given category
     """
+
+    user_object = User.objects.filter(id=request.user.id).first()
+    
+    def view_listing(item):
+        rv = {**item.__dict__}
+        try:
+            user_object.watchlist.get(item=item)
+        except Watch.DoesNotExist:
+            rv["watching"] = False
+        else:
+            rv["watching"] = True
+        return rv
+
+    view_listings = [view_listing(item) for item in Listing.objects.filter(sold=False, category=category_id)]
+
+
     return render(request, "auctions/category.html", {
-        "listings": Listing.objects.filter(sold=False, category=category_id),
+        "listings": view_listings,
         "this_category": Category.objects.filter(id=category_id).first(),
         "categories": Category.objects.all()
     })

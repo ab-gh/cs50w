@@ -22,17 +22,17 @@ Complete the implementation of your auction site. You must fulfill the following
 - **Models**: 
     - [x] User
     - [x] Listing
-        - [ ] Condition **MIGRATION**
+        - [x] Condition **MIGRATION**
     - [x] Bid
     - [x] Comment
-    - [ ] Watch
+    - [x] Watch
     - [x] Category
     - [x] Condition
 - **Create Listing**:
-    - [ ] Add URL for image
+    - [x] Add URL for image
 - **Active Listings Page**:
     - [ ] CSS
-    - [ ] Condition
+    - [x] Condition
     - [ ] **LATEST BID NOT START BID**
 - **Listing Page**: 
     - [ ] CSS
