@@ -9,3 +9,12 @@ img {
     display: block;
     max-width: 40%;
 }
+input[type="submit"]:not(.btn) {
+    border:none;
+    background-color: none;
+    -webkit-appearance: none;
+    border: none;
+    box-shadow: none;
+    background: none;
+    color: white;
+}

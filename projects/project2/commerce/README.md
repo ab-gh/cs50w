@@ -31,24 +31,24 @@ Complete the implementation of your auction site. You must fulfill the following
 - **Create Listing**:
     - [x] Add URL for image
 - **Active Listings Page**:
-    - [ ] CSS
+    - [x] CSS
     - [x] Condition
     - [ ] **LATEST BID NOT START BID**
 - **Listing Page**: 
-    - [ ] CSS
-    - [ ] Condition
+    - [x] CSS
+    - [x] Condition
     - [ ] **LATEST BID NOT START BID**
     - Featureset
-        - [ ] Watchlist toggle
+        - [x] Watchlist toggle
         - [ ] Bid POST route
         - [ ] Sell item if seller
         - [ ] Won if sold
         - [ ] Comments POST route
 - **Watchlist**: 
-    - [ ] Model
-    - [ ] Test m2m
+    - [x] Model
+    - [x] Test m2m
 - **Categories**:
-    - [ ] Route
-    - [ ] View
+    - [x] Route
+    - [x] View
 - **Django Admin Interface**:
     - [ ] Import all models

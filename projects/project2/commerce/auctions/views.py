@@ -40,6 +40,9 @@ def index(request):
     
     def view_listing(item):
         rv = {**item.__dict__}
+        rv['condition'] = Condition.objects.get(id=rv['condition_id'])
+        rv['category'] = Category.objects.get(id=rv['category_id'])
+        rv['owner'] = User.objects.get(id=rv['owner_id'])
         try:
             user_object.watchlist.get(item=item)
         except Watch.DoesNotExist:
@@ -49,11 +52,32 @@ def index(request):
         return rv
 
     view_listings = [view_listing(item) for item in Listing.objects.filter(sold=False)]
-  
+
     return render(request, "auctions/index.html", {
         "listings": view_listings,
         "categories": Category.objects.all()
     })
+
+
+def watch(request, listing_id):
+    """
+    POST-only route to toggle watching an item
+    """
+    if request.method == "POST":
+        user_object = User.objects.filter(id=request.user.id).first()
+        item_object = Listing.objects.filter(id=listing_id).first()
+        try:
+            watch_entry = user_object.watchlist.get(item=item_object)
+        except Watch.DoesNotExist:
+            form = Watch(user=user_object, item=item_object)
+            form.save()
+        else:
+            watch_entry.delete()
+        next_page = request.POST.get('next', '/')
+        return HttpResponseRedirect(next_page)
+    else:
+        return HttpResponseRedirect(reverse("index"))
+
 
 
 def category(request, category_id):
@@ -65,6 +89,10 @@ def category(request, category_id):
     
     def view_listing(item):
         rv = {**item.__dict__}
+        rv = {**item.__dict__}
+        rv['condition'] = Condition.objects.get(id=rv['condition_id'])
+        rv['category'] = Category.objects.get(id=rv['category_id'])
+        rv['owner'] = User.objects.get(id=rv['owner_id'])
         try:
             user_object.watchlist.get(item=item)
         except Watch.DoesNotExist:
