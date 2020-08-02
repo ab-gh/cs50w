@@ -160,14 +160,14 @@ def listing(request, listing_id):
         highest_bid['user'] = highest_bid_object.bidder
         highest_bid['id'] = highest_bid_object.id
     highest_bid['min'] = float(highest_bid['bid']) + 1
-    
  
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "bid_form": NewBid(),
         "categories": Category.objects.all(),
         "watching": watching,
-        "highest_bid": highest_bid
+        "highest_bid": highest_bid,
+        "comments": item_object.comments.all()
     })
 
 

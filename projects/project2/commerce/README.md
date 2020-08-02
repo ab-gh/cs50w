@@ -43,6 +43,7 @@ Complete the implementation of your auction site. You must fulfill the following
         - [ ] Bid POST route
         - [ ] Sell item if seller
         - [ ] Won if sold
+        - [ ] Comments frontend
         - [ ] Comments POST route
 - **Watchlist**: 
     - [x] Model
