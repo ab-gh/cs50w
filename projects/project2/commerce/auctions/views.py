@@ -79,6 +79,19 @@ def watch(request, listing_id):
         return HttpResponseRedirect(reverse("index"))
 
 
+def bid(request, listing_id):
+    """
+    POST/DELETE-only route to submit a bid on a listing
+    """
+    if request.method == "POST":
+        print(request.POST)
+        print(User.objects.get(id=request.user.id))
+        return HttpResponse(request.POST['bid'])
+    elif request.method == "DELETE":
+        print(request.POST)
+        print(User.objects.get(id=request.user.id))
+        return HttpResponse(request.POST['bid'])
+
 
 def category(request, category_id):
     """
@@ -88,7 +101,6 @@ def category(request, category_id):
     user_object = User.objects.filter(id=request.user.id).first()
     
     def view_listing(item):
-        rv = {**item.__dict__}
         rv = {**item.__dict__}
         rv['condition'] = Condition.objects.get(id=rv['condition_id'])
         rv['category'] = Category.objects.get(id=rv['category_id'])
@@ -136,11 +148,26 @@ def listing(request, listing_id):
         watching = True
 
     listing = Listing.objects.get(id=listing_id)
+
+    highest_bid_object = item_object.bids.last()
+    highest_bid = {}
+
+    if highest_bid_object is None:
+        highest_bid['bid'] = item_object.starting_bid
+        highest_bid['user'] = item_object.owner
+    else:
+        highest_bid['bid'] = highest_bid_object.bid
+        highest_bid['user'] = highest_bid_object.bidder
+        highest_bid['id'] = highest_bid_object.id
+    highest_bid['min'] = float(highest_bid['bid']) + 1
+    
+ 
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "bid_form": NewBid(),
         "categories": Category.objects.all(),
-        "watching": watching
+        "watching": watching,
+        "highest_bid": highest_bid
     })
 
 

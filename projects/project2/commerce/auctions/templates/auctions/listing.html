@@ -38,23 +38,33 @@
         <p class="card-text">{{ listing.description }}</p>
     </div>
     {% if listing.owner.id == request.user.id %}
-    <div class="card-footer pt-3 align-text-top">
+    <div class="card-footer py-3 align-text-top">
+        <h5 class="card-subtitle pb-1">Highest bid: <strong>£{{ highest_bid.bid }}</strong> by {{ highest_bid.user }}</h5>
         <form action="">
-            <input value="Sell for " type="submit" class="btn btn-warning">
+            <input value="Sell for £{{ highest_bid.bid }}" type="submit" class="btn btn-warning">
             <input value="Delete Listing" type="submit" class="btn btn-danger">
         </form>
     </div>
     {% else %}
-    <div class="card-footer">
-        <form action="">
-            <h5 class="card-subtitle pb-1">Current Bid: <strong>£{{ listing.starting_bid }}</strong></h5>
+    <div class="card-footer py-3">
+        {% if highest_bid.user.id == request.user.id %}
+        <form action="{% url 'bid' listing.id %}" method="DELETE">
+            <h5 class="card-subtitle pb-1">You are currently the highest bidder at <strong>£{{ highest_bid.bid }}</strong></h5>
+            {% csrf_token %}
+            <input type="hidden" name="bid_id" value="{{ highest_bid.id }}">
+            <input value="Revoke Bid" type="submit" class="btn btn-danger">
+        </form>
+        {% else %}
+        <form action="{% url 'bid' listing.id %}" method="POST">
+            <h5 class="card-subtitle pb-1">Current Bid: <strong>£{{ highest_bid.bid }}</strong></h5>
+            <h6 class="card-subtitle my-2 text-muted">Bid £{{ highest_bid.min }} or more to outbid</h6>
             {% csrf_token %}
             <div class="form-group">
-                {{ bid_form.bid }}
+                <input type="number" name="bid" min="{{ highest_bid.min }}">
             </div>
-
             <input value="Place Bid" type="submit" class="btn btn-primary">
         </form>
+        {% endif %}
     </div>
     {% endif %}
     </div>

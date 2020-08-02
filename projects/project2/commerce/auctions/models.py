@@ -67,6 +67,10 @@ class Bid(models.Model):
     created_date = models.DateTimeField(auto_now=True)
     bid = models.DecimalField(max_digits=15, decimal_places=2)
 
+
+    class Meta:
+        ordering = ['bid',]
+
     def __str__(self):
         return f"{self.bid} for {self.item} by {self.bidder}"
 
