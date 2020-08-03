@@ -53,3 +53,5 @@ Complete the implementation of your auction site. You must fulfill the following
     - [x] View
 - **Django Admin Interface**:
     - [ ] Import all models
+- **Decorator**
+    - [ ] put `@login_required` everywhere basically
