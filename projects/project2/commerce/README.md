@@ -33,18 +33,18 @@ Complete the implementation of your auction site. You must fulfill the following
 - **Active Listings Page**:
     - [x] CSS
     - [x] Condition
-    - [ ] **LATEST BID NOT START BID**
+    - [x] **LATEST BID NOT START BID**
 - **Listing Page**: 
     - [x] CSS
     - [x] Condition
-    - [ ] **LATEST BID NOT START BID**
+    - [x] **LATEST BID NOT START BID**
     - Featureset
         - [x] Watchlist toggle
-        - [ ] Bid POST route
-        - [ ] Sell item if seller
-        - [ ] Won if sold
-        - [ ] Comments frontend
-        - [ ] Comments POST route
+        - [x] Bid POST route
+        - [x] Sell item if seller
+        - [x] Won if sold
+        - [x] Comments frontend
+        - [x] Comments POST route
 - **Watchlist**: 
     - [x] Model
     - [x] Test m2m
