@@ -3,7 +3,7 @@
 {% block body %}
 <div class="card mb-3 bg-light" style="max-width: 40%;">
     <div class="card-header pt-3 align-text-top">
-        <h2 class="align-text-bottom">{{ listing.title }}</h2>
+        <h2 class="align-text-bottom">{{ listing.title }} {% if listing.sold %}<span class="badge badge-success">Sold</span>{% endif %}</h2>
         <h5 class="card-subtitle mb-2 text-muted">{{ listing.owner }}</h5>
 
         {% if listing.owner.id == request.user.id %}
@@ -37,39 +37,61 @@
         <h5 class="card-subtitle pb-1">{{ listing.condition }}</h5>
         <p class="card-text">{{ listing.description }}</p>
     </div>
-    {% if listing.owner.id == request.user.id %}
+    {% if listing.sold %}
+    <div class="card-footer py-3 align-text-top">
+        {% if listing.owner.id == request.user.id %}
+            <h5 class="card-subtitle pb-1">Sold for <strong>£{{ highest_bid.bid }}</strong> to {{ highest_bid.user }}</h5>
+        {% elif highest_bid.user.id == request.user.id %}
+            <h5 class="card-subtitle pb-1"><strong>You won the auction!</strong></h5>
+            <h6 class="card-subtitle my-2 text-muted">Sold for <strong>£{{ highest_bid.bid }}</strong> to {{ highest_bid.user }}</h6>
+        {% else %}
+            <h5 class="card-subtitle pb-1"><strong>You lost the auction</strong></h5>
+            <h6 class="card-subtitle my-2 text-muted">Sold for <strong>£{{ highest_bid.bid }}</strong></h6>
+        {% endif %}
+    </div>
+    {% elif listing.owner.id == request.user.id %}
     <div class="card-footer py-3 align-text-top">
         <h5 class="card-subtitle pb-1">Highest bid: <strong>£{{ highest_bid.bid }}</strong> by {{ highest_bid.user }}</h5>
-        <form action="">
+        <form action="{% url 'sell' listing.id %}" method="POST">
+            {% csrf_token %}
             <input value="Sell for £{{ highest_bid.bid }}" type="submit" class="btn btn-warning">
             <input value="Delete Listing" type="submit" class="btn btn-danger">
         </form>
     </div>
     {% else %}
     <div class="card-footer py-3">
-        {% if highest_bid.user.id == request.user.id %}
-        <form action="{% url 'bid' listing.id %}" method="DELETE">
-            <h5 class="card-subtitle pb-1">You are currently the highest bidder at <strong>£{{ highest_bid.bid }}</strong></h5>
-            {% csrf_token %}
-            <input type="hidden" name="bid_id" value="{{ highest_bid.id }}">
-            <input value="Revoke Bid" type="submit" class="btn btn-danger">
-        </form>
-        {% else %}
         <form action="{% url 'bid' listing.id %}" method="POST">
+        {% if highest_bid.user.id == request.user.id %}
+            <h5 class="card-subtitle pb-1">You are currently the highest bidder at <strong>£{{ highest_bid.bid }}</strong></h5>
+            <h6 class="card-subtitle my-2 text-muted">Raise bid?</h6>
+        {% else %}
             <h5 class="card-subtitle pb-1">Current Bid: <strong>£{{ highest_bid.bid }}</strong></h5>
             <h6 class="card-subtitle my-2 text-muted">Bid £{{ highest_bid.min }} or more to outbid</h6>
+        {% endif %}
             {% csrf_token %}
             <div class="form-group">
                 <input type="number" name="bid" min="{{ highest_bid.min }}">
             </div>
+            {% if highest_bid.user.id == request.user.id %}
+            <input value="Raise Your Bid" type="submit" class="btn btn-warning">
+            {% else %}
             <input value="Place Bid" type="submit" class="btn btn-primary">
+            {% endif %}
         </form>
-        {% endif %}
+
     </div>
     {% endif %}
     </div>
 </div>
 <h3>Comments ({{ comments.count }})</h3>
+
+<form action="{% url 'comment' listing.id %}" method="POST" id="comment-form" class="pb-5">
+    {% csrf_token %}
+    <textarea form="comment-form" name="comment" type="textarea" rows="4" cols="50"></textarea>
+    <br />
+    <input type="submit" class="btn btn-primary" value="Send Comment">
+</form>
+
 {% for comment in comments %}
 
 <div class="card mb-2 bg-light" style="max-width: 30%;">

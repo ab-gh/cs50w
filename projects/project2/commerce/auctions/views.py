@@ -1,18 +1,18 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.forms import ModelForm
 
 from .models import *
 
-## Model Forms
+## Model Forms ##
+
 class NewListing(ModelForm):
     """
     Form inherited from the Listing model
     """
-
 
     class Meta:
         model = Listing
@@ -24,13 +24,13 @@ class NewBid(ModelForm):
     Form inherited from the Bid model
     """
 
-
     class Meta:
         model = Bid
         fields = ('bid',)
 
 
-## Routes
+## Routes ##
+
 def index(request):
     """
     `.` route
@@ -38,25 +38,38 @@ def index(request):
 
     user_object = User.objects.filter(id=request.user.id).first()
     
-    def view_listing(item):
+    def view_listing(item, user):
         rv = {**item.__dict__}
         rv['condition'] = Condition.objects.get(id=rv['condition_id'])
         rv['category'] = Category.objects.get(id=rv['category_id'])
         rv['owner'] = User.objects.get(id=rv['owner_id'])
-        try:
-            user_object.watchlist.get(item=item)
-        except Watch.DoesNotExist:
-            rv["watching"] = False
-        else:
-            rv["watching"] = True
+        rv['bids_count'] = item.bids.count()
+        if user is not None:
+            try:
+                user_object.watchlist.get(item=item)
+            except Watch.DoesNotExist:
+                rv["watching"] = False
+            else:
+                rv["watching"] = True
         return rv
 
-    view_listings = [view_listing(item) for item in Listing.objects.filter(sold=False)]
+    view_listings = [view_listing(item, user_object) for item in Listing.objects.filter(sold=False)]
 
     return render(request, "auctions/index.html", {
         "listings": view_listings,
         "categories": Category.objects.all()
     })
+
+
+def sell(request, listing_id):
+    """
+    POST-only for the owner of a listing to sell it
+    """
+    item_object = Listing.objects.filter(id=listing_id).first()
+    if request.user.id == item_object.owner.id:
+        item_object.sold = True
+        item_object.save()
+    return HttpResponseRedirect(reverse('index'))
 
 
 def watch(request, listing_id):
@@ -79,18 +92,33 @@ def watch(request, listing_id):
         return HttpResponseRedirect(reverse("index"))
 
 
+def comment(request, listing_id):
+    if request.method == "POST":
+        user_object = User.objects.filter(id=request.user.id).first()
+        item_object = Listing.objects.filter(id=listing_id).first()
+        new_comment = Comment(user=user_object, item=item_object, comment=request.POST['comment'])
+        new_comment.save()
+        return redirect(f'/listing/{listing_id}')
+    return HttpResponse(request.POST['comment'])
+
+
 def bid(request, listing_id):
     """
     POST/DELETE-only route to submit a bid on a listing
     """
     if request.method == "POST":
-        print(request.POST)
-        print(User.objects.get(id=request.user.id))
-        return HttpResponse(request.POST['bid'])
-    elif request.method == "DELETE":
-        print(request.POST)
-        print(User.objects.get(id=request.user.id))
-        return HttpResponse(request.POST['bid'])
+        item_object = Listing.objects.filter(id=listing_id).first()
+        user_object = User.objects.filter(id=request.user.id).first()
+        
+        if item_object.bids.last() is None:
+            current_highest_bid = item_object.starting_bid
+        else:
+            current_highest_bid = item_object.bids.last().bid
+        
+        if float(request.POST['bid']) > float(current_highest_bid):
+            new_bid = Bid(bidder=user_object, item=item_object, bid=request.POST['bid'])
+            new_bid.save()
+            return redirect(f'/listing/{listing_id}')
 
 
 def category(request, category_id):
@@ -121,7 +149,6 @@ def category(request, category_id):
         "this_category": Category.objects.filter(id=category_id).first(),
         "categories": Category.objects.all()
     })
-    
 
 
 def categories(request):

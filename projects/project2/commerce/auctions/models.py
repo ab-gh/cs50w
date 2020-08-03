@@ -84,6 +84,10 @@ class Comment(models.Model):
     created_date = models.DateTimeField(auto_now=True)
     comment = models.TextField()
 
+
+    class Meta:
+        ordering = ['-created_date',]
+
     def __str__(self):
         return f"Comment on {self.item} by {self.user}"
 
