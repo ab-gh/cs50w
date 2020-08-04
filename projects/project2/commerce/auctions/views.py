@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.forms import ModelForm
+from django.contrib.auth.decorators import login_required
 
 from .models import *
 
@@ -60,7 +61,7 @@ def index(request):
         "categories": Category.objects.all()
     })
 
-
+@login_required
 def sell(request, listing_id):
     """
     POST-only for the owner of a listing to sell it
@@ -71,7 +72,7 @@ def sell(request, listing_id):
         item_object.save()
     return HttpResponseRedirect(reverse('index'))
 
-
+@login_required
 def watch(request, listing_id):
     """
     POST-only route to toggle watching an item
@@ -91,7 +92,7 @@ def watch(request, listing_id):
     else:
         return HttpResponseRedirect(reverse("index"))
 
-
+@login_required
 def comment(request, listing_id):
     if request.method == "POST":
         user_object = User.objects.filter(id=request.user.id).first()
@@ -101,7 +102,7 @@ def comment(request, listing_id):
         return redirect(f'/listing/{listing_id}')
     return HttpResponse(request.POST['comment'])
 
-
+@login_required
 def bid(request, listing_id):
     """
     POST/DELETE-only route to submit a bid on a listing
@@ -197,7 +198,7 @@ def listing(request, listing_id):
         "comments": item_object.comments.all()
     })
 
-
+@login_required
 def new_listing(request):
     """
     Route to create a new listing

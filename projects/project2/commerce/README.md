@@ -48,6 +48,7 @@ Complete the implementation of your auction site. You must fulfill the following
 - **Watchlist**: 
     - [x] Model
     - [x] Test m2m
+    - [ ] **PAGE**
 - **Categories**:
     - [x] Route
     - [x] View
