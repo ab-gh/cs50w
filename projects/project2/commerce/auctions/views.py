@@ -61,6 +61,36 @@ def index(request):
         "categories": Category.objects.all()
     })
 
+
+@login_required
+def watchlist(request):
+    user_object = User.objects.filter(id=request.user.id).first()
+    watch_list = user_object.watchlist.all()
+    item_list = []
+    for i in watch_list:
+        item_list.append(i.item)
+
+    def view_listing(item, user):
+        rv = {**item.__dict__}
+        rv['condition'] = Condition.objects.get(id=rv['condition_id'])
+        rv['category'] = Category.objects.get(id=rv['category_id'])
+        rv['owner'] = User.objects.get(id=rv['owner_id'])
+        rv['bids_count'] = item.bids.count()
+        if user is not None:
+            try:
+                user_object.watchlist.get(item=item)
+            except Watch.DoesNotExist:
+                rv["watching"] = False
+            else:
+                rv["watching"] = True
+        return rv
+
+    view_listings = [view_listing(item, user_object) for item in item_list]
+    
+    return render(request, "auctions/watchlist.html", {
+        "watchlist": view_listings
+    })
+
 @login_required
 def sell(request, listing_id):
     """

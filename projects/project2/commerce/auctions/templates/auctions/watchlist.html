@@ -1,0 +1,62 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Watchlist</h2>
+
+    {% for listing in watchlist %}
+    <div class="card mb-3 bg-light" >
+        <div class="row no-gutters">
+            <div class="col-md-4">
+                <img src="{{ listing.image }}" class="card-img" alt="">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <a href="{% url 'listing' listing.id %}"><h5 class="card-title">{{ listing.title }}</h5></a>
+                    <h6 class="card-subtitle my-2 text-muted">{{ listing.condition }}</h6>
+                    {% if listing.owner_id == request.user.id %}
+                        <span class="badge badge-warning">My Listing</span>
+                    {% elif listing.watching %}
+                        <span class="badge badge-primary">Watchlist 
+
+                            <form method="POST" style="display: inline; border:none;" action="{% url 'watch' listing.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <input type="submit" value="X">
+                            </form>
+                    
+                        </span>
+                    {% else %}
+                        <span class="badge badge-secondary">Watch
+                            
+                            <form method="POST" style="display: inline; border:none;" action="{% url 'watch' listing.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <input type="submit" value="+">
+                            </form>
+                    
+                        </span>
+                    {% endif %}
+                    <p class="card-text">{{ listing.description }}</p>
+                    <h5 class="card-text"><strong>£{{ listing.starting_bid }}</strong></h5>
+                    <p class="card-subtitle mb-2 text-muted">{{ listing.bids_count }} Bids</p>
+
+                    <a href="{% url 'listing' listing.id %}" class="btn btn-primary">View Listing</a>
+
+                    <p class="card-text pt-2"><text class="text-muted">{{ listing.category }}</text></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card mb-3 bg-light" >
+        <div class="row no-gutters">
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">No listings</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+{% endblock %}
