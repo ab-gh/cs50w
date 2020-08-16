@@ -48,11 +48,17 @@ Complete the implementation of your auction site. You must fulfill the following
 - **Watchlist**: 
     - [x] Model
     - [x] Test m2m
-    - [ ] **PAGE**
+    - [x] **PAGE**
 - **Categories**:
     - [x] Route
     - [x] View
 - **Django Admin Interface**:
-    - [ ] Import all models
+    - [x] Import all models
 - **Decorator**
-    - [ ] put `@login_required` everywhere basically
+    - [x] put `@login_required` everywhere basically
+
+- **Fixtures/operation**
+    - [ ] Autopopulate categories
+    - [ ] Autopopulate conditions
+
+# Video
