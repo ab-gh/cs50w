@@ -48,10 +48,16 @@ def index(request):
         if user is not None:
             try:
                 user_object.watchlist.get(item=item)
+            except AttributeError:
+                watching = False
             except Watch.DoesNotExist:
                 rv["watching"] = False
             else:
                 rv["watching"] = True
+        if item.bids.last() is None:
+            rv['highest_bid'] = item.starting_bid
+        else:
+            rv['highest_bid'] = item.bids.last().bid
         return rv
 
     view_listings = [view_listing(item, user_object) for item in Listing.objects.filter(sold=False)]
@@ -79,6 +85,8 @@ def watchlist(request):
         if user is not None:
             try:
                 user_object.watchlist.get(item=item)
+            except AttributeError:
+                watching = False
             except Watch.DoesNotExist:
                 rv["watching"] = False
             else:
@@ -112,6 +120,8 @@ def watch(request, listing_id):
         item_object = Listing.objects.filter(id=listing_id).first()
         try:
             watch_entry = user_object.watchlist.get(item=item_object)
+        except AttributeError:
+            watching = False
         except Watch.DoesNotExist:
             form = Watch(user=user_object, item=item_object)
             form.save()
@@ -166,6 +176,8 @@ def category(request, category_id):
         rv['owner'] = User.objects.get(id=rv['owner_id'])
         try:
             user_object.watchlist.get(item=item)
+        except AttributeError:
+            watching = False
         except Watch.DoesNotExist:
             rv["watching"] = False
         else:
@@ -200,6 +212,8 @@ def listing(request, listing_id):
 
     try:
         user_object.watchlist.get(item=item_object)
+    except AttributeError:
+        watching = False
     except Watch.DoesNotExist:
         watching = False
     else:

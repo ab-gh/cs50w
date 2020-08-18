@@ -37,7 +37,7 @@
                         </span>
                     {% endif %}
                     <p class="card-text">{{ listing.description }}</p>
-                    <h5 class="card-text"><strong>£{{ listing.starting_bid }}</strong></h5>
+                    <h5 class="card-text"><strong>£{{ listing.highest_bid }}</strong></h5>
                     <p class="card-subtitle mb-2 text-muted">{{ listing.bids_count }} Bids</p>
 
                     <a href="{% url 'listing' listing.id %}" class="btn btn-primary">View Listing</a>
