@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+
+        <title>Tasks</title>
+
+        <script>
+
+            document.addEventListener('DOMContentLoaded', function() {
+
+                // Submit defaults to disabled
+                document.querySelector('#submit').disabled = true;
+
+                document.querySelector('#task').onkeyup = () => {
+                    if (document.querySelector('#task').value.length > 0) {
+                        document.querySelector('#submit').disabled = false;
+                    } else {
+                        document.querySelector('#submit').disabled = true;
+                    };
+                };
+
+                document.querySelector('form').onsubmit = () => {
+                    const task = document.querySelector('#task').value;
+
+                    const li = document.createElement('li');
+                    li.innerHTML = task;
+
+                    document.querySelector('#tasks').append(li);
+
+                    document.querySelector('#task').value = '';
+
+                    // Stop form from reloading
+                    return false;
+                };
+
+            });
+
+        </script>
+
+    </head>
+
+    <body>
+        
+        <h1 id="hello">Hello!</h1>
+
+        <ul id="tasks">
+        </ul>
+
+        <form>
+            <input type="text" id="task" placeholder="New Task">
+            <input type="submit" id="submit">
+        </form>
+        
+    </body>
+
+</html>
