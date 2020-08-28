@@ -20,6 +20,43 @@ function compose_email() {
 	document.querySelector('#compose-recipients').value = '';
   	document.querySelector('#compose-subject').value = '';
 	document.querySelector('#compose-body').value = '';
+
+	document.querySelector('form > input').addEventListener('click', function() {
+		const recipient =  document.querySelector('#compose-recipients').value;
+		const subject =  document.querySelector('#compose-subject').value;
+		const body = document.querySelector('#compose-body').value;
+
+		fetch('/emails', {
+			method: 'POST',
+			body: JSON.stringify({
+				recipients: recipient,
+				subject: subject,
+				body: body
+			})
+		  })
+		  .then(response => response.json())
+		  .then(result => {
+				if (result.error) {
+					a = document.createElement('div');
+					a.className = "alert alert-danger my-3";
+					a.textContent = `Error: ${result.error}`;
+					document.querySelector('#error-box').innerHTML = "";
+					document.querySelector('#error-box').prepend(a);
+					console.log(result);
+				} else if (result.message) {
+					a = document.createElement('div');
+					a.className = "alert alert-success my-3";
+					a.textContent = `${result.message}`;
+					document.querySelector('#error-box').innerHTML = "";
+					document.querySelector('#error-box').prepend(a);
+					console.log(result);
+					load_mailbox('sent');
+				}
+			  	
+		  });
+	});
+
+
 }
 
 function create_mail_list(subject, timestamp, body, sender) {
@@ -73,23 +110,17 @@ function load_mailbox(mailbox) {
 	fetch(`/emails/${mailbox}`)
 	.then(response => response.json())
 	.then(emails => {
-    // Print emails
-    console.log(emails);
 
-	document.querySelector('#emails-list').innerHTML = '';
-	// ... do something else with emails ...
-	for (i = 0; i < emails.length; i++) {
-		console.log(emails[i]);
-		const li = document.createElement('li');
-		// li.innerHTML = emails[i]['subject'];
-		document.querySelector('#emails-list').append(create_mail_list(emails[i]['subject'], emails[i]['timestamp'], emails[i]['body'], emails[i]['sender']));
-	};
+		// Reset mail list
+		document.querySelector('#emails-list').innerHTML = '';
 
-
-    
-
-
-
+		// Loop over each mail and create its element
+		for (i = 0; i < emails.length; i++) {
+			console.log(emails[i]);
+			const li = document.createElement('li');
+			// li.innerHTML = emails[i]['subject'];
+			document.querySelector('#emails-list').append(create_mail_list(emails[i]['subject'], emails[i]['timestamp'], emails[i]['body'], emails[i]['sender']));
+		};
 
 	});
 
