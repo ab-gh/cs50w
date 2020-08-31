@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+        <title>Hello</title>
+    </head>
+    <body>
+        <div id="app" />
+        <script type="text/babel">
+            class App extends React.Component {
+
+                constructor(props) {
+                    super(props);
+
+                    this.state = {
+                        score: 0,
+                        num1: 1,
+                        num2: 1,
+                        response: ""
+                    };
+                }
+
+                updateResponse = (event) => {
+                    this.setState({
+                        response: event.target.value
+                    });
+                }
+
+                inputKeyPress = (event) => {
+                    if (event.key === "Enter") {
+                        const answer = parseInt(this.state.response);
+                        if (answer === this.state.num1 + this.state.num2) {
+                            // Correct
+                            this.setState(state => ({
+                                score: state.score + 1,
+                                num1: Math.ceil(Math.random() * 10),
+                                num2: Math.ceil(Math.random() * 10),
+                                response: ""
+                            }));
+                        } else {
+                            // Incorrect
+                        }
+                    }
+                }
+
+                render() {
+                    return ( 
+                    <div>
+                        <div>{this.state.num1} + {this.state.num2}</div>
+                        <input onKeyPress={this.inputKeyPress} onChange={this.updateResponse} type="text" value={this.state.response}></input>
+                        <div>Score: {this.state.score}</div>
+                    </div>
+                    );
+                }
+
+            }
+             
+            ReactDOM.render(<App />, document.querySelector("#app"));
+        </script>
+    </body>
+</html>
