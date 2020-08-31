@@ -1,14 +1,12 @@
-document.addEventListener('DOMContentLoaded', function() {
+// Use buttons to toggle between views
+document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
+document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
+document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
+document.querySelector('#compose').addEventListener('click', compose_email);
 
-	// Use buttons to toggle between views
-	document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
-	document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
-	document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
-	document.querySelector('#compose').addEventListener('click', compose_email);
+// By default, load the inbox
+load_mailbox('inbox');
 
-	// By default, load the inbox
-	load_mailbox('inbox');
-});
 
 function compose_email() {
 
@@ -59,44 +57,6 @@ function compose_email() {
 
 }
 
-function create_mail_list(subject, timestamp, body, sender) {
-
-	// A
-	const a = document.createElement('a');
-	a.className = "list-group-item list-group-item-action"
-	a.href = "#"
-
-	// Div
-	const div = document.createElement('div');
-	div.className = "d-flex w-100 justify-content-between";
-
-	// h5
-	const h5 = document.createElement('h5');
-	h5.className = "mb-1";
-	h5.textContent = subject;
-
-	// small
-	const small = document.createElement('small');
-	small.textContent = timestamp;
-
-	// p
-	const p = document.createElement('p');
-	p.textContent = body;
-
-	// small
-	const small2 = document.createElement('small');
-	small2.textContent = sender;
-
-	div.appendChild(h5);
-	div.appendChild(small);
-
-	a.appendChild(div);
-	a.appendChild(p);
-	a.appendChild(small2);
-
-	return a
-}
-
 function load_mailbox(mailbox) {
   
 	// Show the mailbox and hide other views
@@ -112,17 +72,67 @@ function load_mailbox(mailbox) {
 	.then(emails => {
 
 		// Reset mail list
-		document.querySelector('#emails-list').innerHTML = '';
+		// document.querySelector('#emails-list').innerHTML = '';
 
 		// Loop over each mail and create its element
-		for (i = 0; i < emails.length; i++) {
-			console.log(emails[i]);
-			const li = document.createElement('li');
-			// li.innerHTML = emails[i]['subject'];
-			document.querySelector('#emails-list').append(create_mail_list(emails[i]['subject'], emails[i]['timestamp'], emails[i]['body'], emails[i]['sender']));
-		};
+		let archiveCol = mailbox === "inbox" ? "red" : "green";
+		let archiveShow = mailbox === "sent" ? "none" : "block";
+		ReactDOM.render(<Mail emails={emails} archiveCol={archiveCol} archiveShow={archiveShow} />, document.querySelector("#emails-list"));
+
+		const archiveBtn = document.querySelectorAll('.archive-btn')
+		archiveBtn.forEach(function(currentBtn){
+  			currentBtn.addEventListener('click', function() {
+				fetch(`/emails/${this.dataset.id}`, {
+					method: 'PUT',
+					body: JSON.stringify({
+						archived: !!!parseInt(this.dataset.archived)
+					})
+				})
+				.then(response => {
+					load_mailbox(mailbox);
+				})
+			})
+		})
+
+
+
+
+
 
 	});
 
 	
+}
+
+
+class Mail extends React.Component {
+  
+	render() {
+		let content = [];
+		for (let i = 0; i < this.props.emails.length; i++) {
+			const item = this.props.emails[i];
+			const col = this.props.archiveCol;
+			const show = this.props.archiveShow;
+			content.push(
+				<a key={item.id} href="#" className="list-group-item list-group-item-action">
+					<div className="d-flex w-100 justify-content-between">
+						<h5 className="mb-1">{item.subject}</h5>
+						<small className="text-muted">{item.timestamp}</small>
+					</div>
+					<div className="d-flex w-100 justify-content-between">
+						<p className="mb-1">{item.body}.</p>
+						<a data-archived={+item.archived} data-id={item.id} className="archive-btn" style={{display: show}}>
+							<svg width="1.5em" height="1.5em" viewBox="0 0 16 16" className="bi bi-archive" fill={col} xmlns="http://www.w3.org/2000/svg">
+								<path fillRule="evenodd" d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+							</svg>
+						</a>
+					</div>
+					<small className="text-muted">{item.sender}</small>
+				</a>
+			)
+		}
+		return (
+			<div>{content}</div>
+		);
+	}
 }
