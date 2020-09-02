@@ -12,23 +12,24 @@
     <hr>
     <div id="error-box"></div>
 
-    <div id="emails-view">
-        <div id="mailbox-name">
 
+
+    <!-- Mailbox View -->
+    <div id="emails-view">
+
+        <div id="mailbox-name">
         </div>
 
         <ul class="list-group" id="emails-list">
-        
-
         </ul>
 
     </div>
-
     
-
+    <!-- Compose View -->
     <div id="compose-view">
         
         <h3>New Email</h3>
+
         <form id="compose-form">
             <div class="form-group">
                 From: <input disabled class="form-control" value="{{ request.user.email }}">
@@ -42,16 +43,17 @@
             <textarea class="form-control" id="compose-body" placeholder="Body"></textarea>
             <input type="submit" class="btn btn-primary"/>
         </form>
+
+    </div>
+
+    <!-- Email View -->
+    <div id="mail-view">
+
+        
+
     </div>
 {% endblock %}
 
 {% block script %}
     <script src="{% static 'mail/inbox.js' %}" type="text/babel"></script>
-    <!--
-    <script type="text/babel">
-
-        
-  
-      </script>
-      -->
 {% endblock %}
