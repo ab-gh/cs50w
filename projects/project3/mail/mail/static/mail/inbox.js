@@ -18,13 +18,13 @@ function view_email(id) {
 	.then(response => response.json())
 	.then(email => {
 		ReactDOM.render(<Email email={email} />, document.querySelector("#mail-view"));
-
 	})
 
 }
 
 
-function compose_email() {
+function compose_email(email) {
+	console.log("email:", email);
 
 	// Show compose view and hide other views
 	document.querySelector('#emails-view').style.display = 'none';
@@ -32,9 +32,9 @@ function compose_email() {
 	document.querySelector('#mail-view').style.display = 'none';
 
 	// Clear out composition fields
-	document.querySelector('#compose-recipients').value = '';
-  	document.querySelector('#compose-subject').value = '';
-	document.querySelector('#compose-body').value = '';
+	document.querySelector('#compose-recipients').value = (email.sender) ? email.sender : "";
+  	document.querySelector('#compose-subject').value = (email.subject) ? email.subject : "";
+	document.querySelector('#compose-body').value = (email.body) ? `On ${email.timestamp}, ${email.sender} wrote: ${email.body}` : "";
 
 	document.querySelector('form > input').addEventListener('click', function() {
 		const recipient =  document.querySelector('#compose-recipients').value;
@@ -88,31 +88,10 @@ function load_mailbox(mailbox) {
 	fetch(`/emails/${mailbox}`)
 	.then(response => response.json())
 	.then(emails => {
-
-		// Reset mail list
-		// document.querySelector('#emails-list').innerHTML = '';
-
 		// Loop over each mail and create its element
 		let archiveCol = mailbox === "inbox" ? "red" : "green";
 		let archiveShow = mailbox === "sent" ? "none" : "block";
 		ReactDOM.render(<Mailbox emails={emails} archiveCol={archiveCol} archiveShow={archiveShow} mailbox={mailbox} />, document.querySelector("#emails-list"));
-
-		// const mailBtn = document.querySelectorAll('.list-group-item')
-		// mailBtn.forEach(function(currentBtn){
-		// 	currentBtn.addEventListener('click', function(event) {
-		// 		event.stopPropagation();
-		// 		fetch(`/emails/${this.dataset.id}`, {
-		// 			method: 'PUT',
-		// 			body: JSON.stringify({
-		// 				read: true
-		// 			})
-		// 		})
-		// 		.then(response => {
-		// 			view_email(this.dataset.id);
-		// 		})
-		// 	})
-		// })
-
 	});
 }
 
@@ -215,17 +194,25 @@ class Read extends React.Component {
 				</div>
 			)
 		}
-		
 	}
 }
 
 class Email extends React.Component {
+	reply = (event) => {
+		compose_email(this.props.email);
+	};
+
 	render() {
 		return(
 			<div className="card">
-            <h5 className="card-header">From: {this.props.email.sender}</h5>
+			<h5 className="card-header">
+				<div className="d-flex w-100 justify-content-between">
+					<div>From: {this.props.email.sender}</div>
+					<button onClick={this.reply} className="btn btn-outline-primary">Reply</button>
+				</div>
+			</h5>
             <div className="card-header text-muted">
-                To: {this.props.email.recipients}
+                To: {this.props.email.recipients.join(", ")}
               </div>
             <div className="card-body">
                 <h5 className="card-title">{this.props.email.subject}</h5>
@@ -241,34 +228,6 @@ class Email extends React.Component {
 class Mailbox extends React.Component {
   
 	render() {
-		// let content = [];
-		// for (let i = 0; i < this.props.emails.length; i++) {
-		// 	const item = this.props.emails[i];
-		// 	const col = this.props.archiveCol;
-		// 	const show = this.props.archiveShow;
-		// 	const read = item.read ? "list-group-item-secondary" : "";
-		// 	content.push(
-		// 		<a onClick={this.view} key={item.id} id={item.id} className={`list-group-item list-group-item-action ${ read }`}>
-
-		// 			<div className="d-flex w-100 justify-content-between">
-		// 				<h5 className="mb-1">{item.subject}</h5>
-		// 				<small className="text-muted">{item.timestamp}</small>
-		// 			</div>
-		// 			<div className="d-flex w-100 justify-content-between">
-		// 				<div>
-		// 					<p className="mb-1">{item.body}.</p>
-		// 				</div>
-		// 				<div>
-		// 					<Read state={item.read} id={item.id} mailbox={this.props.mailbox} />
-		// 					<br />
-		// 					<Archive state={item.archived} id={item.id} mailbox={this.props.mailbox} />
-		// 				</div>
-		// 			</div>
-		// 			<small className="text-muted">{item.sender}</small>
-					
-		// 		</a>
-		// 	)
-		// }
 		console.log(this.props.emails)
 		var items = [];
 		for (let i = 0; i < this.props.emails.length; i++) {
