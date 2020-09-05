@@ -49,26 +49,8 @@ function compose_email(email) {
 				body: body
 			})
 		  })
-		  .then(response => response.json())
-		  .then(result => {
-				if (result.error) {
-					a = document.createElement('div');
-					a.className = "alert alert-danger my-3";
-					a.textContent = `Error: ${result.error}`;
-					document.querySelector('#error-box').innerHTML = "";
-					document.querySelector('#error-box').prepend(a);
-					console.log(result);
-				} else if (result.message) {
-					a = document.createElement('div');
-					a.className = "alert alert-success my-3";
-					a.textContent = `${result.message}`;
-					document.querySelector('#error-box').innerHTML = "";
-					document.querySelector('#error-box').prepend(a);
-					console.log(result);
-					load_mailbox('sent');
-				}
-			  	
-		  });
+		  .then(load_mailbox('sent'));
+		  return false
 	});
 
 
@@ -97,9 +79,6 @@ function load_mailbox(mailbox) {
 
 class Archive extends React.Component {
 	unarchive = (event) => {
-		// TODO
-		// REMOVE THIS
-		event.nativeEvent.stopImmediatePropagation();
 		event.stopPropagation();
 		fetch(`/emails/${this.props.id}`, {
 			method: 'PUT',
@@ -113,9 +92,6 @@ class Archive extends React.Component {
 	};
 
 	archive = (event) => {
-		// TODO
-		// REMOVE THIS
-		event.nativeEvent.stopImmediatePropagation();
 		event.stopPropagation();
 		fetch(`/emails/${this.props.id}`, {
 			method: 'PUT',
