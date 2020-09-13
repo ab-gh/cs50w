@@ -17,12 +17,17 @@ class Post(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     content = models.CharField(max_length=280)
 
+    class Meta:
+        ordering = ['-timestamp',]
+
+
     def serialize(self):
         return {
             "id": self.id,
             "timestamp": self.timestamp.strftime("%b %-d %Y, %-I:%M %p"),
             "content": self.content,
-            "user": self.user.username
+            "user": self.user.username,
+            "likes": self.liked_by.count()
         }
 
 

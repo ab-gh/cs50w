@@ -85,7 +85,10 @@ def post(request):
                 }, status=400)
     elif request.method == "GET":
         posts = Post.objects.all()
-        return JsonResponse([post.serialize() for post in posts], safe=False)
+        posts_dict = [post.serialize() for post in posts]
+        for post in posts_dict:
+            post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
+        return JsonResponse(posts_dict, safe=False)
     else:
         return JsonResponse({"error": "POST or GET request required."}, status=400)
 
@@ -96,4 +99,32 @@ def get_post(request, post_id):
             post = Post.objects.get(user=request.user, pk=post_id)
         except Post.DoesNotExist:
             return JsonResponse({"error": "Post not found."}, status=404)
-        return JsonResponse(post.serialize())
+        post_dict = post.serialize()
+        post_dict['liked'] = True if request.user.likes.filter(post=post).exists() else False
+        print(post_dict)
+        return JsonResponse(post_dict)
+
+@csrf_exempt
+def likes(request, post_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        try:
+            like = Like.objects.get(user=request.user, post=Post.objects.get(id=post_id))
+        except Like.DoesNotExist:
+            if data.get("like"):
+                like = Like(
+                    user=request.user,
+                    post=Post.objects.get(user=request.user, pk=post_id)
+                )
+                like.save()
+                return JsonResponse({'message': 'Post liked successfully.'}, status=200)
+            else:
+                return JsonResponse({'message': 'Post unliked successfully.'}, status=200)
+        else:
+            print("like")
+            print(data.get("like"))
+            if data.get("like"):
+                return JsonResponse({'message': 'Post liked successfully.'}, status=200)
+            else:
+                like.delete()
+                return JsonResponse({'message': 'Post unliked successfully.'}, status=200)

@@ -11,6 +11,14 @@ if (followingBtn) followingBtn.addEventListener('click', () => view_following())
 
 view_all();
 
+function view_find(name) {
+    if (name === "all") {
+        view_all();
+    } else if (name === "following") {
+        view_following();
+    }
+}
+
 function view_all() {
     // Show view_all and hide the rest
     document.querySelector('#all-posts').style.display = 'block';
@@ -18,13 +26,15 @@ function view_all() {
 
     fetch('/post', {
         method: 'GET'
-      })
-      .then(response => response.json())
-      .then(result => {
-          // Print result
-          console.log(result);
-          ReactDOM.render(<Posts posts={result} />, document.querySelector('#all-posts > #post-feed'))
-      });
+        })
+        .then(response => response.json())
+        .then(result => {
+            // Print result
+            console.log(result);
+            ReactDOM.render(<Posts posts={result} view="all"/>, document.querySelector('#all-posts > #post-feed'));
+            return false;
+        });
+    return false;
 }
 
 function view_following() {
@@ -37,28 +47,71 @@ class Posts extends React.Component {
     render() {
         var feed = [];
         for (let i = 0; i < this.props.posts.length; i++){
-            feed.push(<Post key={i} post={this.props.posts[i]}/>)
+            feed.push(<Post key={i} post={this.props.posts[i]} view={this.props.view}/>)
         }
         return <div>{feed}</div>
+    }
+}
+
+class Like extends React.Component {
+    like = (event) => {
+        event.stopPropagation();
+        fetch(`/likes/${this.props.post.id}`, {
+            method: 'POST',
+            body: JSON.stringify({
+				like: true
+			})
+		})
+		.then(response => {
+			view_find(this.props.view);
+		})
+    };
+    unlike = (event) => {
+        event.stopPropagation();
+        fetch(`/likes/${this.props.post.id}`, {
+            method: 'POST',
+            body: JSON.stringify({
+				like: false
+			})
+		})
+		.then(response => {
+			view_find(this.props.view);
+		})
+    };
+    render() {
+        if (this.props.post.liked) {
+            return(
+                <small className="text-muted" onClick={this.unlike}>
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-heart" fill="DeepPink" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                    </svg>
+                </small>
+            )
+        } else {
+            return(
+                <small className="text-muted" onClick={this.like}>
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-heart" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" d="M8 2.748l-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                    </svg>
+                </small>
+            )
+        }
     }
 }
 
 class Post extends React.Component {
     render() {
         return(
-        <a href="#" class="list-group-item list-group-item-action">
-            <div class="d-flex w-100">
-                <h5 class="mb-1">@{this.props.post.user}</h5>
+        <a className="list-group-item list-group-item-action">
+            <div className="d-flex w-100">
+                <h6 className="mb-1">@{this.props.post.user}</h6>
             </div>
-            <p class="mb-1">{this.props.post.content}</p>
+            <p className="mb-1">{this.props.post.content}</p>
             <div>
-                <small class="text-muted">
-                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-heart" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" d="M8 2.748l-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                    </svg>
-                </small>
-                <small class="text-muted px-2">•</small>
-                <small class="text-muted">{this.props.post.timestamp}</small>
+                <small className="text-muted px-2">{this.props.post.likes}</small>
+                <Like post={this.props.post} view={this.props.view}/>
+                <small className="text-muted px-2">•</small>
+                <small className="text-muted">{this.props.post.timestamp}</small>
             </div>
         </a>
         )
