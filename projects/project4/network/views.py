@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import User, Post, Like
+from .models import User, Post, Like, Follow
 
 
 def index(request):
@@ -87,8 +87,9 @@ def post(request):
     elif request.method == "GET":
         posts = Post.objects.all()
         posts_dict = [post.serialize() for post in posts]
-        for post in posts_dict:
-            post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
+        if request.user.is_authenticated:
+            for post in posts_dict:
+                post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
         return JsonResponse(posts_dict, safe=False)
     else:
         return JsonResponse({"error": "POST or GET request required."}, status=400)
@@ -114,16 +115,40 @@ def user(request, user_id):
             return JsonResponse({"error": "User does not exist."}, status=404)
         else:
             posts_dict = [post.serialize() for post in user.posts.all()]
-            for post in posts_dict:
-                post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
+            if request.user.is_authenticated:
+                for post in posts_dict:
+                    post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
             return JsonResponse({
                 "username": user.username,
                 "user_id": user.id,
-                "followers": user.followers.count(),
-                "following": user.following.count(),
+                "followers_count": user.followers.count(),
+                "following_count": user.following.count(),
+                "following": user.followers.filter(user=request.user).exists(),
                 "posts": posts_dict
             }, safe=False)
 
+@csrf_exempt
+def follow(request, user_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        try:
+            follow = Follow.objects.get(user=request.user, following=User.objects.get(id=user_id))
+        except ObjectDoesNotExist:
+            if data.get("follow"):
+                follow = Follow(
+                    user=request.user,
+                    following=User.objects.get(id=user_id)
+                )
+                follow.save()
+                return JsonResponse({'message': 'User followed successfully'}, status=201)
+            else:
+                return JsonResponse({'message': 'User unfollowed successfully'}, status=201)
+        else:
+            if data.get('follow'):
+                return JsonResponse({'message': 'User followed successfully'}, status=201)
+            else:
+                follow.delete()
+                return JsonResponse({'message': 'User unfollowed successfully'}, status=201)
 
 @csrf_exempt
 def likes(request, post_id):
@@ -138,14 +163,12 @@ def likes(request, post_id):
                     post=Post.objects.get(pk=post_id)
                 )
                 like.save()
-                return JsonResponse({'message': 'Post liked successfully.'}, status=200)
+                return JsonResponse({'message': 'Post liked successfully.'}, status=201)
             else:
-                return JsonResponse({'message': 'Post unliked successfully.'}, status=200)
+                return JsonResponse({'message': 'Post unliked successfully.'}, status=201)
         else:
-            print("like")
-            print(data.get("like"))
             if data.get("like"):
-                return JsonResponse({'message': 'Post liked successfully.'}, status=200)
+                return JsonResponse({'message': 'Post liked successfully.'}, status=201)
             else:
                 like.delete()
-                return JsonResponse({'message': 'Post unliked successfully.'}, status=200)
+                return JsonResponse({'message': 'Post unliked successfully.'}, status=201)

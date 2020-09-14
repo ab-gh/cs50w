@@ -11,13 +11,13 @@ if (followingBtn) followingBtn.addEventListener('click', () => view_following())
 
 view_all();
 
-function view_find(name) {
+function view_find(name, profile) {
     if (name === "all") {
         view_all();
     } else if (name === "following") {
         view_following();
     } else if (name === "profile") {
-        view_profile();
+        view_profile(profile);
     }
 }
 
@@ -33,7 +33,7 @@ function view_profile(user_id) {
     .then(response => response.json())
     .then(result => {
         console.log(result)
-        ReactDOM.render(<Profile profile={result} view="profile" />, document.querySelector('#profile-page'))
+        ReactDOM.render(<Profile profile={result} view="profile" user={document.querySelector('#profile-page').dataset.user} />, document.querySelector('#profile-page'))
     })
 }
 
@@ -68,18 +68,68 @@ class Profile extends React.Component {
         return(
             <div>
                 <h1 className="pt-3">@{this.props.profile.username}</h1>
+
+                <Follow view={this.props.view} profile={this.props.profile} user={this.props.user} />
+
                 <div className="align-items-center">
-                    <h5>Following <span className="badge badge-primary badge-pill">{this.props.profile.following}</span> • Followers <span className="badge badge-primary badge-pill">{this.props.profile.followers}</span></h5>
+                    <h5>Following <span className="badge badge-primary badge-pill">{this.props.profile.following_count}</span> • Followers <span className="badge badge-primary badge-pill">{this.props.profile.followers_count}</span></h5>
                 </div>
 
                 <h2 className="py-3">Posts</h2>
 
-                <ul class="list-group" id="post-feed">
+                <ul className="list-group" id="post-feed">
                     <Posts posts={this.props.profile.posts} view="profile" />
                 </ul>
 
             </div>
         )
+    }
+}
+
+class Follow extends React.Component {
+    follow = (event) => {
+        event.stopPropagation();
+        fetch(`/follow/${this.props.profile.user_id}`, {
+            method: 'POST',
+            body: JSON.stringify({
+				follow: true
+			})
+		})
+		.then(response => {
+			view_find(this.props.view, this.props.profile.user_id);
+		})
+    };
+    unfollow = (event) => {
+        event.stopPropagation();
+        fetch(`/follow/${this.props.profile.user_id}`, {
+            method: 'POST',
+            body: JSON.stringify({
+				follow: false
+			})
+		})
+		.then(response => {
+			view_find(this.props.view, this.props.profile.user_id);
+		})
+    };
+    render() {
+        console.log(this.props.user);
+        if (this.props.profile.username == this.props.user) {
+            return(
+                <div></div>
+            )
+        } else if (this.props.profile.following) {
+            return(
+                <div className="pt-2 pb-3">
+                    <button onClick={this.unfollow} type="button" className="btn btn-outline-danger">Unfollow @{this.props.profile.username}</button>
+                </div>   
+            )
+        } else {
+            return(
+                <div className="pt-2 pb-3">
+                    <button onClick={this.follow} type="button" className="btn btn-outline-primary">Follow @{this.props.profile.username}</button>
+                </div>   
+            )
+        }
     }
 }
 
