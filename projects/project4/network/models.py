@@ -27,6 +27,7 @@ class Post(models.Model):
             "timestamp": self.timestamp.strftime("%b %-d %Y, %-I:%M %p"),
             "content": self.content,
             "user": self.user.username,
+            "user_id": self.user.id,
             "likes": self.liked_by.count()
         }
 
@@ -44,3 +45,11 @@ class Like(models.Model):
 
     def __str__(self):
         return f"{self.user} likes {self.post}"
+
+class Follow(models.Model):
+    """
+    A user following another
+    """
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers")

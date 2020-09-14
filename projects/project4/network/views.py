@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import User, Post, Like
 
@@ -105,16 +106,36 @@ def get_post(request, post_id):
         return JsonResponse(post_dict)
 
 @csrf_exempt
+def user(request, user_id):
+    if request.method == "GET":
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User does not exist."}, status=404)
+        else:
+            posts_dict = [post.serialize() for post in user.posts.all()]
+            for post in posts_dict:
+                post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
+            return JsonResponse({
+                "username": user.username,
+                "user_id": user.id,
+                "followers": user.followers.count(),
+                "following": user.following.count(),
+                "posts": posts_dict
+            }, safe=False)
+
+
+@csrf_exempt
 def likes(request, post_id):
     if request.method == "POST":
         data = json.loads(request.body)
         try:
             like = Like.objects.get(user=request.user, post=Post.objects.get(id=post_id))
-        except Like.DoesNotExist:
+        except ObjectDoesNotExist:
             if data.get("like"):
                 like = Like(
                     user=request.user,
-                    post=Post.objects.get(user=request.user, pk=post_id)
+                    post=Post.objects.get(pk=post_id)
                 )
                 like.save()
                 return JsonResponse({'message': 'Post liked successfully.'}, status=200)
