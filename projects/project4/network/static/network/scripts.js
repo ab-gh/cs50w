@@ -1,11 +1,14 @@
 // View toggles
 document.querySelector('#all-posts-button').addEventListener('click', () => view_all());
 
-const profileBtn = document.querySelector('#profile-button')
+const profileBtn = document.querySelector('#profile-button');
 if (profileBtn) profileBtn.addEventListener('click', () => view_profile(profileBtn.dataset.id));
 
-const followingBtn = document.querySelector('#following-button')
+const followingBtn = document.querySelector('#following-button');
 if (followingBtn) followingBtn.addEventListener('click', () => view_following());
+
+const postBtn = document.querySelector('#new_post');
+if (postBtn) postBtn.addEventListener('click', () => new_post());
 
 // Load all by default
 
@@ -21,10 +24,20 @@ function view_find(name, profile) {
     }
 }
 
+function new_post() {
+    document.querySelector('#all-posts').style.display = 'none';
+    document.querySelector('#following-posts').style.display = 'none';
+    document.querySelector('#profile-page').style.display = 'none';
+    document.querySelector('#new-post').style.display = 'block';
+
+    ReactDOM.render(<New />, document.querySelector('#new-post'));
+}
+
 function view_profile(user_id) {
     document.querySelector('#all-posts').style.display = 'none';
     document.querySelector('#following-posts').style.display = 'none';
     document.querySelector('#profile-page').style.display = 'block';
+    document.querySelector('#new-post').style.display = 'none';
 
     
     fetch(`/user/${user_id}`, {
@@ -42,6 +55,7 @@ function view_all() {
     document.querySelector('#all-posts').style.display = 'block';
     document.querySelector('#following-posts').style.display = 'none';
     document.querySelector('#profile-page').style.display = 'none';
+    document.querySelector('#new-post').style.display = 'none';
 
     fetch('/post', {
         method: 'GET'
@@ -61,6 +75,88 @@ function view_following() {
     document.querySelector('#all-posts').style.display = 'none';
     document.querySelector('#following-posts').style.display = 'block';
     document.querySelector('#profile-page').style.display = 'none';
+    document.querySelector('#new-post').style.display = 'none';
+}
+
+class New extends React.Component  {
+    constructor(props) {
+        super(props);
+        this.state = {
+            content: "",
+            char: 0,
+            error: ""
+        };
+    }
+
+    render() {
+        
+        return this.newPost();
+        
+    }
+
+    newPost() {
+        return (
+            <div>
+                <h1 className="py-3">New Post</h1>
+                <Error error={this.state.error}/>
+                <form>
+                    <textarea onChange={this.updateResponse} name="content" form="new_post" rows="4" cols="50"></textarea>
+                    <br />
+                    <small style={{color: this.state.char>280 ? "red" : "black"}} id="charcount">{this.state.char}</small><small>/280</small>
+                    <br />
+                    <input onClick={this.inputKeyPress} type="submit" className="btn btn-primary"></input>
+                </form>
+            </div>
+        )
+    }
+
+    inputKeyPress = (event) => {
+        event.preventDefault();
+        if (this.state.char <= 280) {
+            fetch('/post', {
+                method: 'POST',
+                body: JSON.stringify({
+                    content: this.state.content
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Print result
+                console.log(result);
+                view_all();
+            });
+        } else {
+            this.setState({
+                error: "Your post must be 280 characters or shorter."
+            })
+            return false;
+        }
+    }
+
+    updateResponse = (event) => {
+        this.setState({
+            content: event.target.value,
+            char: event.target.value.length
+        });
+        
+    }
+    
+}
+
+class Error extends React.Component {
+    render() {
+        if (this.props.error) {
+            return(
+                <div class="alert alert-danger" role="alert">
+                    {this.props.error}
+                </div>
+            )
+        } else {
+            return(
+                <div></div>
+            )
+        }
+    }
 }
 
 class Profile extends React.Component {
@@ -146,7 +242,7 @@ class Posts extends React.Component {
 class Like extends React.Component {
     like = (event) => {
         event.stopPropagation();
-        fetch(`/likes/${this.props.post.id}`, {
+        fetch(`/like/${this.props.post.id}`, {
             method: 'POST',
             body: JSON.stringify({
 				like: true
@@ -158,7 +254,7 @@ class Like extends React.Component {
     };
     unlike = (event) => {
         event.stopPropagation();
-        fetch(`/likes/${this.props.post.id}`, {
+        fetch(`/like/${this.props.post.id}`, {
             method: 'POST',
             body: JSON.stringify({
 				like: false
@@ -198,7 +294,7 @@ class Post extends React.Component {
                     <h6 onClick={() => {view_profile(this.props.post.user_id)}} className="mb-1">@{this.props.post.user}</h6>
                 </span>
             </div>
-            <p className="my-1">{this.props.post.content}</p>
+            <p className="my-1 text-wrap">{this.props.post.content}</p>
             <div>
                 <small className="text-muted px-2">{this.props.post.likes}</small>
                 <Like post={this.props.post} view={this.props.view}/>

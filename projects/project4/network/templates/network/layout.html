@@ -33,7 +33,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                     </li>
-                    
+                    <li class="ml-3 nav-item">
+                        <a class="btn btn-outline-primary" id="new_post">New Post</a>
+                    </li>
                 {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">Log In</a>

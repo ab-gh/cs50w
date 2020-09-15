@@ -70,6 +70,7 @@ def post(request):
     if request.method == "POST":
         if request.user.is_authenticated:
             data = json.loads(request.body)
+            print(data)
             if data.get("content") == "":
                 return JsonResponse({
                     "error": "Post must contain at least one character."
