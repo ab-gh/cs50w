@@ -70,7 +70,6 @@ def post(request):
     if request.method == "POST":
         if request.user.is_authenticated:
             data = json.loads(request.body)
-            print(data)
             if data.get("content") == "":
                 return JsonResponse({
                     "error": "Post must contain at least one character."
@@ -104,8 +103,21 @@ def get_post(request, post_id):
             return JsonResponse({"error": "Post not found."}, status=404)
         post_dict = post.serialize()
         post_dict['liked'] = True if request.user.likes.filter(post=post).exists() else False
-        print(post_dict)
         return JsonResponse(post_dict)
+    elif request.method == "PATCH":
+        if request.user.is_authenticated:
+            data = json.loads(request.body)
+            try:
+                post = Post.objects.get(user=request.user, pk=post_id)
+            except Post.DoesNotExist:
+                return JsonResponse({"error": "Post not found."}, status=404)
+            else:
+                post.content=data.get("content")
+                post.save()
+                return JsonResponse({"message": "Post edited successfully."}, status=201)
+        else:
+            return JsonResponse({"error": "You must be signed in to edit a post."}, status=401)
+            
 
 @csrf_exempt
 def user(request, user_id):

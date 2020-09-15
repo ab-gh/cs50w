@@ -64,7 +64,7 @@ function view_all() {
         .then(result => {
             // Print result
             console.log(result);
-            ReactDOM.render(<Posts posts={result} view="all"/>, document.querySelector('#all-posts > #post-feed'));
+            ReactDOM.render(<Posts posts={result} view="all" user={document.querySelector('#profile-page').dataset.user}/>, document.querySelector('#all-posts > #post-feed'));
             return false;
         });
     return false;
@@ -77,6 +77,7 @@ function view_following() {
     document.querySelector('#profile-page').style.display = 'none';
     document.querySelector('#new-post').style.display = 'none';
 }
+
 
 class New extends React.Component  {
     constructor(props) {
@@ -233,7 +234,7 @@ class Posts extends React.Component {
     render() {
         var feed = [];
         for (let i = 0; i < this.props.posts.length; i++){
-            feed.push(<Post key={i} post={this.props.posts[i]} view={this.props.view}/>)
+            feed.push(<Post key={i} post={this.props.posts[i]} user={this.props.user} view={this.props.view}/>)
         }
         return <div>{feed}</div>
     }
@@ -300,8 +301,111 @@ class Post extends React.Component {
                 <Like post={this.props.post} view={this.props.view}/>
                 <small className="text-muted px-2">•</small>
                 <small className="text-muted">{this.props.post.timestamp}</small>
+                <EditButton post={this.props.post} user={this.props.user}/>
             </div>
         </a>
         )
     }
+}
+
+class EditButton extends React.Component {
+    render() {
+        if (this.props.post.user === this.props.user) {
+            return(
+                <div id="edit-button">
+                    <small className="text-muted px-2">•</small>
+                    <span onClick={() => {edit_post(this.props.post.id)}} style={{cursor: 'pointer'}} className="badge badge-primary badge-pill">
+                        <small className="mb-1">Edit</small>
+                    </span>
+                </div>
+            )
+        } else {
+            return(
+                <div></div>
+            )
+        }
+    }
+}
+
+function edit_post(post_id) {
+    document.querySelector('#all-posts').style.display = 'none';
+    document.querySelector('#following-posts').style.display = 'none';
+    document.querySelector('#profile-page').style.display = 'none';
+    document.querySelector('#new-post').style.display = 'block';
+
+    fetch(`/post/${post_id}`, {
+        method: 'GET'
+        })
+        .then(response => response.json())
+        .then(result => {
+            // Print result
+            console.log(result);
+            ReactDOM.render(<EditPost post={result} />, document.querySelector('#new-post'));
+            return false;
+        });
+
+
+}
+
+class EditPost extends React.Component  {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            content: this.props.post.content,
+            char: this.props.post.content.length,
+            error: ""
+        };
+    }
+
+    render() {
+        return this.editPost();
+    }
+
+    editPost() {
+        return (
+            <div>
+                <h1 className="py-3">Edit Post</h1>
+                <Error error={this.state.error}/>
+                <form>
+                    <textarea onChange={this.updateField} name="content" form="new_post" rows="4" cols="50" defaultValue={this.props.post.content}></textarea>
+                    <br />
+                    <small style={{color: this.state.char>280 ? "red" : "black"}} id="charcount">{this.state.char}</small><small>/280</small>
+                    <br />
+                    <input onClick={this.KeyPress} type="submit" className="btn btn-primary" value="Save"></input>
+                </form>
+            </div>
+        )
+    }
+
+    KeyPress = (event) => {
+        event.preventDefault();
+        if (this.state.char <= 280) {
+            fetch(`/post/${this.props.post.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    content: this.state.content
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+                view_all();
+            });
+        } else {
+            this.setState({
+                error: "Your post must be 280 characters or shorter."
+            })
+            return false;
+        }
+    }
+
+    updateField = (event) => {
+        this.setState({
+            content: event.target.value,
+            char: event.target.value.length
+        });
+        
+    }
+    
 }
