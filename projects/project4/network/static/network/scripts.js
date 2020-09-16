@@ -186,7 +186,7 @@ class Profile extends React.Component {
 class Follow extends React.Component {
     follow = (event) => {
         event.stopPropagation();
-        fetch(`/follow/${this.props.profile.user_id}`, {
+        fetch(`/user/${this.props.profile.user_id}/follow`, {
             method: 'POST',
             body: JSON.stringify({
 				follow: true
@@ -198,7 +198,7 @@ class Follow extends React.Component {
     };
     unfollow = (event) => {
         event.stopPropagation();
-        fetch(`/follow/${this.props.profile.user_id}`, {
+        fetch(`/user/${this.props.profile.user_id}/follow`, {
             method: 'POST',
             body: JSON.stringify({
 				follow: false
@@ -243,7 +243,7 @@ class Posts extends React.Component {
 class Like extends React.Component {
     like = (event) => {
         event.stopPropagation();
-        fetch(`/like/${this.props.post.id}`, {
+        fetch(`/post/${this.props.post.id}/likes`, {
             method: 'POST',
             body: JSON.stringify({
 				like: true
@@ -255,7 +255,7 @@ class Like extends React.Component {
     };
     unlike = (event) => {
         event.stopPropagation();
-        fetch(`/like/${this.props.post.id}`, {
+        fetch(`/${this.props.post.id}/likes`, {
             method: 'POST',
             body: JSON.stringify({
 				like: false
