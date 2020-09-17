@@ -38,14 +38,8 @@ function view_profile(user_id) {
     document.querySelector('#new-post').style.display = 'none';
 
     
-    fetch(`/user/${user_id}`, {
-        method: 'GET'
-    })
-    .then(response => response.json())
-    .then(result => {
-        console.log(result)
-        ReactDOM.render(<Profile profile={result} view="profile" user={document.querySelector('#profile-page').dataset.user} />, document.querySelector('#profile-page'))
-    })
+
+    ReactDOM.render(<Profile profile={user_id} view="profile" user={document.querySelector('#profile-page').dataset.user} />, document.querySelector('#profile-page'))
 }
 
 function view_all() {
@@ -148,21 +142,67 @@ class Error extends React.Component {
 }
 
 class Profile extends React.Component {
+    constructor(props) {
+        console.log("loader constructor");
+        super(props);
+        this.state = {
+            pageNumber: 1,
+            postsList: [{}],
+            username: "",
+            user_id: this.props.profile,
+            followers_count: 0,
+            following_count: 0,
+            following: false,
+            has_next: true,
+            has_prev: true
+        }
+        this.fetchPage(this.state.pageNumber);
+    };
+    fetchPage(page_id) {
+        console.log("loader pageFetch");
+        fetch(`user/${this.props.profile}/page/${page_id}`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log("loader result");
+            console.log(result);
+            this.setState({
+                postsList: result.posts,
+                pageNumber: page_id,
+                username: result.username,
+                user_id: result.user_id,
+                followers_count: result.followers_count,
+                following_count: result.following_count,
+                following: result.following,
+                has_next: result.has_next,
+                has_prev: result.has_prev   
+            })
+        })
+    };
+    nextPage = () => {
+        let num = parseInt(this.state.pageNumber);
+        this.fetchPage(++num);
+    };
+    prevPage = () => {
+        let num = parseInt(this.state.pageNumber);
+        this.fetchPage(--num);
+    };
     render() {
         return(
             <div>
-                <h1 className="pt-3">@{this.props.profile.username}</h1>
+                <h1 className="pt-3">@{this.state.username}</h1>
 
-                <Follow view={this.props.view} profile={this.props.profile} user={this.props.user} />
+                <Follow following={this.state.following} view={this.props.view} profile={this.state.user_id} profile_username={this.state.username} user={this.props.user} />
 
                 <div className="align-items-center">
-                    <h5>Following <span className="badge badge-primary badge-pill">{this.props.profile.following_count}</span> • Followers <span className="badge badge-primary badge-pill">{this.props.profile.followers_count}</span></h5>
+                    <h5>Following <span className="badge badge-primary badge-pill">{this.state.following_count}</span> • Followers <span className="badge badge-primary badge-pill">{this.state.followers_count}</span></h5>
                 </div>
 
                 <h2 className="py-3">Posts</h2>
 
-                <ul className="list-group" id="post-feed">
-                    <Posts posts={this.props.profile.posts} view="profile" />
+                <ul className="list-group pb-5" id="post-feed">
+                    <Posts prevPage={this.prevPage} nextPage={this.nextPage} page={this.state.pageNumber} posts={this.state.postsList} view="profile" />
                 </ul>
 
             </div>
@@ -173,19 +213,19 @@ class Profile extends React.Component {
 class Follow extends React.Component {
     follow = (event) => {
         event.stopPropagation();
-        fetch(`/user/${this.props.profile.user_id}/follow`, {
+        fetch(`/user/${this.props.profile}/follow`, {
             method: 'POST',
             body: JSON.stringify({
 				follow: true
 			})
 		})
 		.then(response => {
-			view_find(this.props.view, this.props.profile.user_id);
+			view_find(this.props.view, this.props.user_id);
 		})
     };
     unfollow = (event) => {
         event.stopPropagation();
-        fetch(`/user/${this.props.profile.user_id}/follow`, {
+        fetch(`/user/${this.props.profile}/follow`, {
             method: 'POST',
             body: JSON.stringify({
 				follow: false
@@ -197,20 +237,20 @@ class Follow extends React.Component {
     };
     render() {
         console.log(this.props.user);
-        if (this.props.profile.username == this.props.user) {
+        if (this.props.profile_username == this.props.user) {
             return(
                 <div></div>
             )
-        } else if (this.props.profile.following) {
+        } else if (this.props.following) {
             return(
                 <div className="pt-2 pb-3">
-                    <button onClick={this.unfollow} type="button" className="btn btn-outline-danger">Unfollow @{this.props.profile.username}</button>
+                    <button onClick={this.unfollow} type="button" className="btn btn-outline-danger">Unfollow @{this.props.profile_username}</button>
                 </div>   
             )
         } else {
             return(
                 <div className="pt-2 pb-3">
-                    <button onClick={this.follow} type="button" className="btn btn-outline-primary">Follow @{this.props.profile.username}</button>
+                    <button onClick={this.follow} type="button" className="btn btn-outline-primary">Follow @{this.props.profile_username}</button>
                 </div>   
             )
         }
@@ -234,23 +274,21 @@ class PostsLoader extends React.Component {
         })
         .then(response => response.json())
         .then(result => {
+            console.log(result)
             console.log("loader result");
             this.setState({
-                postsList: result
+                postsList: result.posts,
+                pageNumber: page_id
             })
         })
     };
     nextPage = () => {
         let num = parseInt(this.state.pageNumber);
-        this.setState({
-            pageNumber: num++
-        });
+        this.fetchPage(++num);
     };
     prevPage = () => {
         let num = parseInt(this.state.pageNumber);
-        this.setState({
-            pageNumber: num--
-        });
+        this.fetchPage(--num);
     };
     render() {
         console.log("loader renderer");
@@ -262,6 +300,7 @@ class PostsLoader extends React.Component {
         )
     }
 }
+
 
 class Posts extends React.Component {
     render() {

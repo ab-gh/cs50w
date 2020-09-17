@@ -67,8 +67,7 @@ def register(request):
         return render(request, "network/register.html")
 
 @csrf_exempt
-def post(request, page_id):
-    print("at post")
+def new_post(request):
     if request.method == "POST":
         if request.user.is_authenticated:
             data = json.loads(request.body)
@@ -86,7 +85,12 @@ def post(request, page_id):
             return JsonResponse({
                     "error": "You must be logged in to send a Post."
                 }, status=400)
-    elif request.method == "GET":
+    else:
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+@csrf_exempt
+def post(request, page_id):
+    if request.method == "GET":
         print("get ", page_id)
         posts = Post.objects.all()
         posts_dict = [post.serialize() for post in posts]
@@ -95,9 +99,13 @@ def post(request, page_id):
                 post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
         posts_page = Paginator(posts_dict, 10)
         print(posts_page.page(page_id).object_list)
-        return JsonResponse(posts_page.page(page_id).object_list, safe=False)
+        return JsonResponse({
+            "posts": posts_page.page(page_id).object_list,
+            "has_next": posts_page.page(page_id).has_next(),
+            "has_prev": posts_page.page(page_id).has_previous()
+        }, safe=False)
     else:
-        return JsonResponse({"error": "POST or GET request required."}, status=400)
+        return JsonResponse({"error": "GET request required."}, status=400)
 
 @csrf_exempt
 def get_post(request, post_id):
@@ -125,7 +133,7 @@ def get_post(request, post_id):
             
 
 @csrf_exempt
-def user(request, user_id):
+def user(request, user_id, page_id):
     if request.method == "GET":
         try:
             user = User.objects.get(id=user_id)
@@ -136,13 +144,17 @@ def user(request, user_id):
             if request.user.is_authenticated:
                 for post in posts_dict:
                     post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
+            posts_page = Paginator(posts_dict, 10)
+            print(posts_page.page(page_id).object_list)
             return JsonResponse({
                 "username": user.username,
                 "user_id": user.id,
                 "followers_count": user.followers.count(),
                 "following_count": user.following.count(),
                 "following": user.followers.filter(user=request.user).exists(),
-                "posts": posts_dict
+                "posts": posts_page.page(page_id).object_list,
+                "has_next": posts_page.page(page_id).has_next(),
+                "has_prev": posts_page.page(page_id).has_previous()
             }, safe=False)
 
 @csrf_exempt
