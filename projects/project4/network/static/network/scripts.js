@@ -37,8 +37,6 @@ function view_profile(user_id) {
     document.querySelector('#profile-page').style.display = 'block';
     document.querySelector('#new-post').style.display = 'none';
 
-    
-
     ReactDOM.render(<Profile profile={user_id} view="profile" user={document.querySelector('#profile-page').dataset.user} />, document.querySelector('#profile-page'))
 }
 
@@ -188,12 +186,42 @@ class Profile extends React.Component {
         let num = parseInt(this.state.pageNumber);
         this.fetchPage(--num);
     };
+    follow = (event) => {
+        event.stopPropagation();
+        fetch(`/user/${this.props.profile}/follow`, {
+            method: 'POST',
+            body: JSON.stringify({
+				follow: true
+			})
+		})
+		.then(response => {
+			this.setState({
+                following: true,
+                followers_count: ++this.state.followers_count
+            })
+		})
+    };
+    unfollow = (event) => {
+        event.stopPropagation();
+        fetch(`/user/${this.props.profile}/follow`, {
+            method: 'POST',
+            body: JSON.stringify({
+                follow: false
+			})
+		})
+		.then(response => {
+			this.setState({
+                following: false,
+                followers_count: --this.state.followers_count   
+            })
+		})
+    };
     render() {
         return(
             <div>
                 <h1 className="pt-3">@{this.state.username}</h1>
 
-                <Follow following={this.state.following} view={this.props.view} profile={this.state.user_id} profile_username={this.state.username} user={this.props.user} />
+                <Follow follow={this.follow} unfollow={this.unfollow} following={this.state.following} view={this.props.view} profile={this.state.user_id} profile_username={this.state.username} user={this.props.user} />
 
                 <div className="align-items-center">
                     <h5>Following <span className="badge badge-primary badge-pill">{this.state.following_count}</span> • Followers <span className="badge badge-primary badge-pill">{this.state.followers_count}</span></h5>
@@ -211,30 +239,6 @@ class Profile extends React.Component {
 }
 
 class Follow extends React.Component {
-    follow = (event) => {
-        event.stopPropagation();
-        fetch(`/user/${this.props.profile}/follow`, {
-            method: 'POST',
-            body: JSON.stringify({
-				follow: true
-			})
-		})
-		.then(response => {
-			view_find(this.props.view, this.props.user_id);
-		})
-    };
-    unfollow = (event) => {
-        event.stopPropagation();
-        fetch(`/user/${this.props.profile}/follow`, {
-            method: 'POST',
-            body: JSON.stringify({
-				follow: false
-			})
-		})
-		.then(response => {
-			view_find(this.props.view, this.props.profile.user_id);
-		})
-    };
     render() {
         console.log(this.props.user);
         if (this.props.profile_username == this.props.user) {
@@ -244,13 +248,13 @@ class Follow extends React.Component {
         } else if (this.props.following) {
             return(
                 <div className="pt-2 pb-3">
-                    <button onClick={this.unfollow} type="button" className="btn btn-outline-danger">Unfollow @{this.props.profile_username}</button>
+                    <button onClick={this.props.unfollow} type="button" className="btn btn-outline-danger">Unfollow @{this.props.profile_username}</button>
                 </div>   
             )
         } else {
             return(
                 <div className="pt-2 pb-3">
-                    <button onClick={this.follow} type="button" className="btn btn-outline-primary">Follow @{this.props.profile_username}</button>
+                    <button onClick={this.props.follow} type="button" className="btn btn-outline-primary">Follow @{this.props.profile_username}</button>
                 </div>   
             )
         }
