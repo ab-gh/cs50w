@@ -12,8 +12,6 @@ if (postBtn) postBtn.addEventListener('click', () => new_post());
 
 // Load all by default
 
-view_all();
-
 function view_find(name, profile) {
     if (name === "all") {
         view_all();
@@ -57,17 +55,8 @@ function view_all() {
     document.querySelector('#profile-page').style.display = 'none';
     document.querySelector('#new-post').style.display = 'none';
 
-    fetch('/post', {
-        method: 'GET'
-        })
-        .then(response => response.json())
-        .then(result => {
-            // Print result
-            console.log(result);
-            ReactDOM.render(<Posts posts={result} view="all" user={document.querySelector('#profile-page').dataset.user}/>, document.querySelector('#all-posts > #post-feed'));
-            return false;
-        });
-    return false;
+    console.log("startview")
+    ReactDOM.render(<PostsLoader view="all" user={document.querySelector('#profile-page').dataset.user}/>, document.querySelector('#all-posts > #post-feed'));
 }
 
 function view_following() {
@@ -90,9 +79,7 @@ class New extends React.Component  {
     }
 
     render() {
-        
         return this.newPost();
-        
     }
 
     newPost() {
@@ -101,7 +88,7 @@ class New extends React.Component  {
                 <h1 className="py-3">New Post</h1>
                 <Error error={this.state.error}/>
                 <form>
-                    <textarea onChange={this.updateResponse} name="content" form="new_post" rows="4" cols="50"></textarea>
+                    <textarea onChange={this.updateResponse} name="content" form="new_post" rows="4" cols="50" defaultValue=""></textarea>
                     <br />
                     <small style={{color: this.state.char>280 ? "red" : "black"}} id="charcount">{this.state.char}</small><small>/280</small>
                     <br />
@@ -230,13 +217,72 @@ class Follow extends React.Component {
     }
 }
 
+class PostsLoader extends React.Component {
+    constructor(props) {
+        console.log("loader constructor");
+        super(props);
+        this.state = {
+            pageNumber: 1,
+            postsList: [{}]
+        }
+        this.fetchPage(this.state.pageNumber);
+    };
+    fetchPage(page_id) {
+        console.log("loader pageFetch");
+        fetch(`post/page/${page_id}`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log("loader result");
+            this.setState({
+                postsList: result
+            })
+        })
+    };
+    nextPage = () => {
+        let num = parseInt(this.state.pageNumber);
+        this.setState({
+            pageNumber: num++
+        });
+    };
+    prevPage = () => {
+        let num = parseInt(this.state.pageNumber);
+        this.setState({
+            pageNumber: num--
+        });
+    };
+    render() {
+        console.log("loader renderer");
+        console.log(this.state.pageNumber)
+        return(
+            <div className="pb-5">
+                <Posts prevPage={this.prevPage} nextPage={this.nextPage} posts={this.state.postsList} page={this.state.pageNumber} user={this.props.user} view={this.props.view}/>
+            </div>
+        )
+    }
+}
+
 class Posts extends React.Component {
     render() {
-        var feed = [];
-        for (let i = 0; i < this.props.posts.length; i++){
+        let feed = [];
+        for (let i = 0; i < this.props.posts.length; i++) {
             feed.push(<Post key={i} post={this.props.posts[i]} user={this.props.user} view={this.props.view}/>)
         }
-        return <div>{feed}</div>
+        return(
+            <div>
+                <button onClick={this.props.prevPage} type="button" className="mr-3 my-4 btn btn-primary">
+                    <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" className="bi bi-arrow-left" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg> Previous Page</button>
+                <button onClick={this.props.nextPage} type="button" className="mx-3 my-4 btn btn-primary">
+                    Next Page 
+                    <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" className="bi bi-arrow-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                    </svg></button>
+                <div>{feed}</div>
+            </div>
+        )
     }
 }
 
@@ -405,7 +451,10 @@ class EditPost extends React.Component  {
             content: event.target.value,
             char: event.target.value.length
         });
-        
     }
     
 }
+
+
+
+view_all();

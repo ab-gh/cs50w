@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
 
 from .models import User, Post, Like, Follow
 
@@ -66,7 +67,8 @@ def register(request):
         return render(request, "network/register.html")
 
 @csrf_exempt
-def post(request):
+def post(request, page_id):
+    print("at post")
     if request.method == "POST":
         if request.user.is_authenticated:
             data = json.loads(request.body)
@@ -85,12 +87,15 @@ def post(request):
                     "error": "You must be logged in to send a Post."
                 }, status=400)
     elif request.method == "GET":
+        print("get ", page_id)
         posts = Post.objects.all()
         posts_dict = [post.serialize() for post in posts]
         if request.user.is_authenticated:
             for post in posts_dict:
                 post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
-        return JsonResponse(posts_dict, safe=False)
+        posts_page = Paginator(posts_dict, 10)
+        print(posts_page.page(page_id).object_list)
+        return JsonResponse(posts_page.page(page_id).object_list, safe=False)
     else:
         return JsonResponse({"error": "POST or GET request required."}, status=400)
 
