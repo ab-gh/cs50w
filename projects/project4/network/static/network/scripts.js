@@ -267,8 +267,9 @@ class PostsLoader extends React.Component {
         super(props);
         this.state = {
             pageNumber: 1,
-            postsList: [{}]
-        }
+            postsList: [{}],
+            isDataFetched: false
+        };
         this.fetchPage(this.state.pageNumber);
     };
     fetchPage(page_id) {
@@ -282,7 +283,8 @@ class PostsLoader extends React.Component {
             console.log("loader result");
             this.setState({
                 postsList: result.posts,
-                pageNumber: page_id
+                pageNumber: page_id,
+                isDataFetched: true
             })
         })
     };
@@ -295,8 +297,9 @@ class PostsLoader extends React.Component {
         this.fetchPage(--num);
     };
     render() {
+        if(!this.state.isDataFetched) return null;
         console.log("loader renderer");
-        console.log(this.state.pageNumber)
+        console.log("page" + this.state.pageNumber)
         return(
             <div className="pb-5">
                 <Posts prevPage={this.prevPage} nextPage={this.nextPage} posts={this.state.postsList} page={this.state.pageNumber} user={this.props.user} view={this.props.view}/>
@@ -329,53 +332,47 @@ class Posts extends React.Component {
     }
 }
 
-class Like extends React.Component {
+class Post extends React.Component {
+    constructor(props) {
+        console.log("post constructor");
+        super(props);
+        this.state = {
+            liked: this.props.post.liked,
+            likes: this.props.post.likes
+        };
+        console.log(this.props.post.liked);
+        console.log(this.props.post.likes);
+    };
     like = (event) => {
         event.stopPropagation();
         fetch(`/post/${this.props.post.id}/likes`, {
             method: 'POST',
             body: JSON.stringify({
-				like: true
+                like: true
 			})
 		})
 		.then(response => {
-			view_find(this.props.view);
+			this.setState({
+                liked: true,
+                likes: ++this.state.likes
+            })
 		})
     };
     unlike = (event) => {
         event.stopPropagation();
-        fetch(`/${this.props.post.id}/likes`, {
+        fetch(`/post/${this.props.post.id}/likes`, {
             method: 'POST',
             body: JSON.stringify({
 				like: false
 			})
 		})
 		.then(response => {
-			view_find(this.props.view);
+			this.setState({
+                liked: false,
+                likes: --this.state.likes
+            })
 		})
     };
-    render() {
-        if (this.props.post.liked) {
-            return(
-                <small style={{cursor: 'pointer'}} className="text-muted" onClick={this.unlike}>
-                    <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-heart" fill="DeepPink" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
-                    </svg>
-                </small>
-            )
-        } else {
-            return(
-                <small style={{cursor: 'pointer'}} className="text-muted" onClick={this.like}>
-                    <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-heart" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" d="M8 2.748l-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
-                    </svg>
-                </small>
-            )
-        }
-    }
-}
-
-class Post extends React.Component {
     render() {
         return(
         <a className="list-group-item list-group-item-action">
@@ -386,8 +383,7 @@ class Post extends React.Component {
             </div>
             <p className="my-1 text-wrap">{this.props.post.content}</p>
             <div>
-                <small className="text-muted px-2">{this.props.post.likes}</small>
-                <Like post={this.props.post} view={this.props.view}/>
+                <Like className={{display: 'inline'}} likes={this.state.likes} like={this.like} unlike={this.unlike} liked={this.state.liked} post={this.props.post} view={this.props.view}/>
                 <small className="text-muted px-2">•</small>
                 <small className="text-muted">{this.props.post.timestamp}</small>
                 <EditButton post={this.props.post} user={this.props.user}/>
@@ -396,6 +392,36 @@ class Post extends React.Component {
         )
     }
 }
+
+class Like extends React.Component {
+    render() {
+        if (this.props.liked) {
+            return(
+                <div id="like">
+                    <small className="text-muted px-2">{this.props.likes}</small>
+                    <small style={{cursor: 'pointer'}} className="text-muted" onClick={this.props.unlike}>
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-heart" fill="DeepPink" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                        </svg>
+                    </small>
+                </div>
+            )
+        } else {
+            return(
+                <div id="like">
+                    <small className="text-muted px-2">{this.props.likes}</small>
+                    <small style={{cursor: 'pointer'}} className="text-muted" onClick={this.props.like}>
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" className="bi bi-heart" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" d="M8 2.748l-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                        </svg>
+                    </small>
+                </div>
+            )
+        }
+    }
+}
+
+
 
 class EditButton extends React.Component {
     render() {
