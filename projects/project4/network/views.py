@@ -108,6 +108,31 @@ def post(request, page_id):
         return JsonResponse({"error": "GET request required."}, status=400)
 
 @csrf_exempt
+def feed(request, page_id):
+    if request.method == "GET" and request.user.is_authenticated:
+        try:
+            follow_objects = request.user.following.all()
+        except:
+            print("failed")
+        follow_id = [i.following.id for i in follow_objects]
+        print(follow_id)
+        posts = Post.objects.filter(user_id__in=follow_id)
+        posts_dict = [post.serialize() for post in posts]
+        if request.user.is_authenticated:
+            for post in posts_dict:
+                post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
+        posts_page = Paginator(posts_dict, 10)
+        print(posts_page.page(page_id).object_list)
+        return JsonResponse({
+            "posts": posts_page.page(page_id).object_list,
+            "has_next": posts_page.page(page_id).has_next(),
+            "has_prev": posts_page.page(page_id).has_previous()
+        }, safe=False)
+    else:
+        return JsonResponse({"error": "You must be signed in to view your feed"}, status=401)    
+
+
+@csrf_exempt
 def get_post(request, post_id):
     if request.method == "GET":
         try:
@@ -129,8 +154,7 @@ def get_post(request, post_id):
                 post.save()
                 return JsonResponse({"message": "Post edited successfully."}, status=201)
         else:
-            return JsonResponse({"error": "You must be signed in to edit a post."}, status=401)
-            
+            return JsonResponse({"error": "You must be signed in to edit a post."}, status=401)         
 
 @csrf_exempt
 def user(request, user_id, page_id):

@@ -47,7 +47,7 @@ function view_all() {
     document.querySelector('#profile-page').style.display = 'none';
     document.querySelector('#new-post').style.display = 'none';
 
-    console.log("startview")
+    console.log("startview");
     ReactDOM.render(<PostsLoader view="all" user={document.querySelector('#profile-page').dataset.user}/>, document.querySelector('#all-posts > #post-feed'));
 }
 
@@ -57,6 +57,9 @@ function view_following() {
     document.querySelector('#following-posts').style.display = 'block';
     document.querySelector('#profile-page').style.display = 'none';
     document.querySelector('#new-post').style.display = 'none';
+
+    console.log("startfollow");
+    ReactDOM.render(<FollowingLoader view="following" user={document.querySelector('#profile-page').dataset.user} />, document.querySelector('#following-posts > #post-feed'))
 }
 
 
@@ -261,30 +264,34 @@ class Follow extends React.Component {
     }
 }
 
-class PostsLoader extends React.Component {
+class FollowingLoader extends React.Component {
     constructor(props) {
-        console.log("loader constructor");
+        console.log("f loader constructor");
         super(props);
         this.state = {
             pageNumber: 1,
             postsList: [{}],
-            isDataFetched: false
+            isDataFetched: false,
+            hasNext: false,
+            hasPrev: false
         };
         this.fetchPage(this.state.pageNumber);
     };
     fetchPage(page_id) {
-        console.log("loader pageFetch");
-        fetch(`post/page/${page_id}`, {
+        console.log("f loader pageFetch");
+        fetch(`user/@me/feed/${page_id}`, {
             method: 'GET'
         })
         .then(response => response.json())
         .then(result => {
-            console.log(result)
-            console.log("loader result");
+            console.log(result);
+            console.log("f loader result");
             this.setState({
                 postsList: result.posts,
                 pageNumber: page_id,
-                isDataFetched: true
+                isDataFetched: true,
+                hasNext: result.has_next,
+                hasPrev: result.has_prev
             })
         })
     };
@@ -302,7 +309,60 @@ class PostsLoader extends React.Component {
         console.log("page" + this.state.pageNumber)
         return(
             <div className="pb-5">
-                <Posts prevPage={this.prevPage} nextPage={this.nextPage} posts={this.state.postsList} page={this.state.pageNumber} user={this.props.user} view={this.props.view}/>
+                <Posts hasPrev={this.state.hasPrev} prevPage={this.prevPage} hasNext={this.state.hasNext} nextPage={this.nextPage} posts={this.state.postsList} page={this.state.pageNumber} user={this.props.user} view={this.props.view}/>
+            </div>
+        )
+    }
+
+
+}
+
+class PostsLoader extends React.Component {
+    constructor(props) {
+        console.log("loader constructor");
+        super(props);
+        this.state = {
+            pageNumber: 1,
+            postsList: [{}],
+            isDataFetched: false,
+            hasNext: false,
+            hasPrev: false
+        };
+        this.fetchPage(this.state.pageNumber);
+    };
+    fetchPage(page_id) {
+        console.log("loader pageFetch");
+        fetch(`post/page/${page_id}`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log(result);
+            console.log("loader result");
+            this.setState({
+                postsList: result.posts,
+                pageNumber: page_id,
+                isDataFetched: true,
+                hasNext: result.has_next,
+                hasPrev: result.has_prev
+            })
+        })
+    };
+    nextPage = () => {
+        let num = parseInt(this.state.pageNumber);
+        this.fetchPage(++num);
+    };
+    prevPage = () => {
+        let num = parseInt(this.state.pageNumber);
+        this.fetchPage(--num);
+    };
+    render() {
+        if(!this.state.isDataFetched) return null;
+        console.log("loader renderer");
+        console.log("page" + this.state.pageNumber)
+        return(
+            <div className="pb-5">
+                <Posts hasPrev={this.state.hasPrev} prevPage={this.prevPage} hasNext={this.state.hasNext} nextPage={this.nextPage} posts={this.state.postsList} page={this.state.pageNumber} user={this.props.user} view={this.props.view}/>
             </div>
         )
     }
@@ -317,11 +377,11 @@ class Posts extends React.Component {
         }
         return(
             <div>
-                <button onClick={this.props.prevPage} type="button" className="mr-3 my-4 btn btn-primary">
+                <button style={{display: this.props.hasPrev ? "inline" : "none"}} onClick={this.props.prevPage} type="button" className="mr-3 my-4 btn btn-primary">
                     <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" className="bi bi-arrow-left" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path fillRule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
                     </svg> Previous Page</button>
-                <button onClick={this.props.nextPage} type="button" className="mx-3 my-4 btn btn-primary">
+                <button style={{display: this.props.hasNext ? "inline" : "none"}} onClick={this.props.nextPage} type="button" className="mx-3 my-4 btn btn-primary">
                     Next Page 
                     <svg width="1.5em" height="1.5em" viewBox="0 0 16 16" className="bi bi-arrow-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path fillRule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
@@ -420,8 +480,6 @@ class Like extends React.Component {
         }
     }
 }
-
-
 
 class EditButton extends React.Component {
     render() {
