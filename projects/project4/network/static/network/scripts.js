@@ -71,12 +71,10 @@ class New extends React.Component  {
             char: 0,
             error: ""
         };
-    }
-
+    };
     render() {
         return this.newPost();
-    }
-
+    };
     newPost() {
         return (
             <div>
@@ -91,8 +89,7 @@ class New extends React.Component  {
                 </form>
             </div>
         )
-    }
-
+    };
     inputKeyPress = (event) => {
         event.preventDefault();
         if (this.state.char <= 280) {
@@ -104,8 +101,6 @@ class New extends React.Component  {
             })
             .then(response => response.json())
             .then(result => {
-                // Print result
-                console.log(result);
                 view_all();
             });
         } else {
@@ -114,17 +109,15 @@ class New extends React.Component  {
             })
             return false;
         }
-    }
-
+    };
     updateResponse = (event) => {
         this.setState({
             content: event.target.value,
             char: event.target.value.length
         });
         
-    }
-    
-}
+    };
+};
 
 class Error extends React.Component {
     render() {
@@ -139,8 +132,8 @@ class Error extends React.Component {
                 <div></div>
             )
         }
-    }
-}
+    };
+};
 
 class Profile extends React.Component {
     constructor(props) {
@@ -156,7 +149,7 @@ class Profile extends React.Component {
             following: false,
             has_next: true,
             has_prev: true
-        }
+        };
         this.fetchPage(this.state.pageNumber);
     };
     fetchPage(page_id) {
