@@ -20,7 +20,7 @@ function view_find(name, profile) {
     } else if (name === "profile") {
         view_profile(profile);
     }
-}
+};
 
 function new_post() {
     document.querySelector('#all-posts').style.display = 'none';
@@ -29,7 +29,7 @@ function new_post() {
     document.querySelector('#new-post').style.display = 'block';
 
     ReactDOM.render(<New />, document.querySelector('#new-post'));
-}
+};
 
 function view_profile(user_id) {
     document.querySelector('#all-posts').style.display = 'none';
@@ -38,7 +38,7 @@ function view_profile(user_id) {
     document.querySelector('#new-post').style.display = 'none';
 
     ReactDOM.render(<Profile profile={user_id} view="profile" user={document.querySelector('#profile-page').dataset.user} />, document.querySelector('#profile-page'))
-}
+};
 
 function view_all() {
     // Show view_all and hide the rest
@@ -47,9 +47,8 @@ function view_all() {
     document.querySelector('#profile-page').style.display = 'none';
     document.querySelector('#new-post').style.display = 'none';
 
-    console.log("startview");
     ReactDOM.render(<PostsLoader view="all" user={document.querySelector('#profile-page').dataset.user}/>, document.querySelector('#all-posts > #post-feed'));
-}
+};
 
 function view_following() {
     // Show view_all and hide the rest
@@ -58,9 +57,8 @@ function view_following() {
     document.querySelector('#profile-page').style.display = 'none';
     document.querySelector('#new-post').style.display = 'none';
 
-    console.log("startfollow");
     ReactDOM.render(<FollowingLoader view="following" user={document.querySelector('#profile-page').dataset.user} />, document.querySelector('#following-posts > #post-feed'))
-}
+};
 
 
 class New extends React.Component  {
@@ -101,6 +99,8 @@ class New extends React.Component  {
             })
             .then(response => response.json())
             .then(result => {
+                const e = new Event("posts-refresh")
+                document.documentElement.dispatchEvent(e)
                 view_all();
             });
         } else {
@@ -115,7 +115,6 @@ class New extends React.Component  {
             content: event.target.value,
             char: event.target.value.length
         });
-        
     };
 };
 
@@ -137,7 +136,6 @@ class Error extends React.Component {
 
 class Profile extends React.Component {
     constructor(props) {
-        console.log("loader constructor");
         super(props);
         this.state = {
             pageNumber: 1,
@@ -153,14 +151,11 @@ class Profile extends React.Component {
         this.fetchPage(this.state.pageNumber);
     };
     fetchPage(page_id) {
-        console.log("loader pageFetch");
         fetch(`user/${this.props.profile}/page/${page_id}`, {
             method: 'GET'
         })
         .then(response => response.json())
         .then(result => {
-            console.log("loader result");
-            console.log(result);
             this.setState({
                 postsList: result.posts,
                 pageNumber: page_id,
@@ -231,8 +226,8 @@ class Profile extends React.Component {
 
             </div>
         )
-    }
-}
+    };
+};
 
 class Follow extends React.Component {
     render() {
@@ -254,12 +249,11 @@ class Follow extends React.Component {
                 </div>   
             )
         }
-    }
-}
+    };
+};
 
 class FollowingLoader extends React.Component {
     constructor(props) {
-        console.log("f loader constructor");
         super(props);
         this.state = {
             pageNumber: 1,
@@ -271,14 +265,11 @@ class FollowingLoader extends React.Component {
         this.fetchPage(this.state.pageNumber);
     };
     fetchPage(page_id) {
-        console.log("f loader pageFetch");
         fetch(`user/@me/feed/${page_id}`, {
             method: 'GET'
         })
         .then(response => response.json())
         .then(result => {
-            console.log(result);
-            console.log("f loader result");
             this.setState({
                 postsList: result.posts,
                 pageNumber: page_id,
@@ -298,21 +289,16 @@ class FollowingLoader extends React.Component {
     };
     render() {
         if(!this.state.isDataFetched) return null;
-        console.log("loader renderer");
-        console.log("page" + this.state.pageNumber)
         return(
             <div className="pb-5">
                 <Posts hasPrev={this.state.hasPrev} prevPage={this.prevPage} hasNext={this.state.hasNext} nextPage={this.nextPage} posts={this.state.postsList} page={this.state.pageNumber} user={this.props.user} view={this.props.view}/>
             </div>
         )
     }
-
-
-}
+};
 
 class PostsLoader extends React.Component {
     constructor(props) {
-        console.log("loader constructor");
         super(props);
         this.state = {
             pageNumber: 1,
@@ -321,17 +307,17 @@ class PostsLoader extends React.Component {
             hasNext: false,
             hasPrev: false
         };
+        document.documentElement.addEventListener("posts-refresh", e => {
+            this.fetchPage(1)
+        })
         this.fetchPage(this.state.pageNumber);
     };
     fetchPage(page_id) {
-        console.log("loader pageFetch");
         fetch(`post/page/${page_id}`, {
             method: 'GET'
         })
         .then(response => response.json())
         .then(result => {
-            console.log(result);
-            console.log("loader result");
             this.setState({
                 postsList: result.posts,
                 pageNumber: page_id,
@@ -351,16 +337,13 @@ class PostsLoader extends React.Component {
     };
     render() {
         if(!this.state.isDataFetched) return null;
-        console.log("loader renderer");
-        console.log("page" + this.state.pageNumber)
         return(
             <div className="pb-5">
                 <Posts hasPrev={this.state.hasPrev} prevPage={this.prevPage} hasNext={this.state.hasNext} nextPage={this.nextPage} posts={this.state.postsList} page={this.state.pageNumber} user={this.props.user} view={this.props.view}/>
             </div>
         )
-    }
-}
-
+    };
+};
 
 class Posts extends React.Component {
     render() {
@@ -382,8 +365,8 @@ class Posts extends React.Component {
                 <div>{feed}</div>
             </div>
         )
-    }
-}
+    };
+};
 
 class Post extends React.Component {
     constructor(props) {
@@ -393,8 +376,6 @@ class Post extends React.Component {
             liked: this.props.post.liked,
             likes: this.props.post.likes
         };
-        console.log(this.props.post.liked);
-        console.log(this.props.post.likes);
     };
     like = (event) => {
         event.stopPropagation();
@@ -443,8 +424,8 @@ class Post extends React.Component {
             </div>
         </a>
         )
-    }
-}
+    };
+};
 
 class Like extends React.Component {
     render() {
@@ -471,8 +452,8 @@ class Like extends React.Component {
                 </div>
             )
         }
-    }
-}
+    };
+};
 
 class EditButton extends React.Component {
     render() {
@@ -490,8 +471,8 @@ class EditButton extends React.Component {
                 <div></div>
             )
         }
-    }
-}
+    };
+};
 
 function edit_post(post_id) {
     document.querySelector('#all-posts').style.display = 'none';
@@ -501,20 +482,16 @@ function edit_post(post_id) {
 
     fetch(`/post/${post_id}`, {
         method: 'GET'
-        })
-        .then(response => response.json())
-        .then(result => {
-            // Print result
-            console.log(result);
-            ReactDOM.render(<EditPost post={result} />, document.querySelector('#new-post'));
-            return false;
-        });
-
-
-}
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Print result
+        ReactDOM.render(<EditPost post={result} />, document.querySelector('#new-post'));
+        return false;
+    });
+};
 
 class EditPost extends React.Component  {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -522,12 +499,10 @@ class EditPost extends React.Component  {
             char: this.props.post.content.length,
             error: ""
         };
-    }
-
+    };
     render() {
         return this.editPost();
-    }
-
+    };
     editPost() {
         return (
             <div>
@@ -542,8 +517,7 @@ class EditPost extends React.Component  {
                 </form>
             </div>
         )
-    }
-
+    };
     KeyPress = (event) => {
         event.preventDefault();
         if (this.state.char <= 280) {
@@ -555,7 +529,8 @@ class EditPost extends React.Component  {
             })
             .then(response => response.json())
             .then(result => {
-                console.log(result);
+                const e = new Event("posts-refresh")
+                document.documentElement.dispatchEvent(e)
                 view_all();
             });
         } else {
@@ -564,17 +539,13 @@ class EditPost extends React.Component  {
             })
             return false;
         }
-    }
-
+    };
     updateField = (event) => {
         this.setState({
             content: event.target.value,
             char: event.target.value.length
         });
-    }
-    
+    };
 }
-
-
 
 view_all();
