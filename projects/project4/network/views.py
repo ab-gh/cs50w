@@ -14,7 +14,6 @@ from .models import User, Post, Like, Follow
 def index(request):
     return render(request, "network/index.html")
 
-
 def login_view(request):
     if request.method == "POST":
 
@@ -34,26 +33,20 @@ def login_view(request):
     else:
         return render(request, "network/login.html")
 
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
-
 
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
-
-        # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
             return render(request, "network/register.html", {
                 "message": "Passwords must match."
             })
-
-        # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
@@ -91,14 +84,12 @@ def new_post(request):
 @csrf_exempt
 def post(request, page_id):
     if request.method == "GET":
-        print("get ", page_id)
         posts = Post.objects.all()
         posts_dict = [post.serialize() for post in posts]
         if request.user.is_authenticated:
             for post in posts_dict:
                 post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
         posts_page = Paginator(posts_dict, 10)
-        print(posts_page.page(page_id).object_list)
         return JsonResponse({
             "posts": posts_page.page(page_id).object_list,
             "has_next": posts_page.page(page_id).has_next(),
@@ -113,16 +104,14 @@ def feed(request, page_id):
         try:
             follow_objects = request.user.following.all()
         except:
-            print("failed")
+            return JsonResponse({"error": "User not found"}, status=400)   
         follow_id = [i.following.id for i in follow_objects]
-        print(follow_id)
         posts = Post.objects.filter(user_id__in=follow_id)
         posts_dict = [post.serialize() for post in posts]
         if request.user.is_authenticated:
             for post in posts_dict:
                 post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
         posts_page = Paginator(posts_dict, 10)
-        print(posts_page.page(page_id).object_list)
         return JsonResponse({
             "posts": posts_page.page(page_id).object_list,
             "has_next": posts_page.page(page_id).has_next(),
@@ -169,7 +158,6 @@ def user(request, user_id, page_id):
                 for post in posts_dict:
                     post['liked'] = True if request.user.likes.filter(post=Post.objects.get(id=post['id'])).exists() else False
             posts_page = Paginator(posts_dict, 10)
-            print(posts_page.page(page_id).object_list)
             return JsonResponse({
                 "username": user.username,
                 "user_id": user.id,
