@@ -138,6 +138,7 @@ class Profile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            isDataFetched: false,
             pageNumber: 1,
             postsList: [{}],
             username: "",
@@ -157,6 +158,7 @@ class Profile extends React.Component {
         .then(response => response.json())
         .then(result => {
             this.setState({
+                isDataFetched: true,
                 postsList: result.posts,
                 pageNumber: page_id,
                 username: result.username,
@@ -208,6 +210,7 @@ class Profile extends React.Component {
 		})
     };
     render() {
+        if(!this.state.isDataFetched) return null;
         return(
             <div>
                 <h1 className="pt-3">@{this.state.username}</h1>
